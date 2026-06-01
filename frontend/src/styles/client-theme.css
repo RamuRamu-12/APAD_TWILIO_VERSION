@@ -538,7 +538,12 @@ h1, h2, h3, h4, h5, h6 {
 }
 
 .admin-header {
-  margin-bottom: 0;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 2rem;
+  flex-wrap: wrap;
+  gap: 1rem;
 }
 
 .table-responsive {
@@ -711,6 +716,55 @@ input:checked + .toggle-slider:before {
 
 .chart-bar-fill.high-ctr {
   background: var(--gradient-emerald);
+}
+
+.chart-bar-fill {
+  position: relative;
+}
+
+.chart-bar-value {
+  position: absolute;
+  right: 0.5rem;
+  top: 50%;
+  transform: translateY(-50%);
+  font-size: 0.75rem;
+  font-weight: 800;
+  color: #000;
+}
+
+.ad-ctr-callout {
+  display: inline-block;
+  padding: 0.15rem 0.4rem;
+  border-radius: 6px;
+  font-weight: 700;
+  font-size: 0.8rem;
+}
+
+.analytics-section {
+  margin-top: 3rem;
+}
+
+.modal-footer-btns {
+  display: flex;
+  justify-content: flex-end;
+  gap: 1rem;
+  margin-top: 1.5rem;
+}
+
+.demographics-chart-list {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.demo-bar-group {
+  display: flex;
+  flex-direction: column;
+}
+
+.page-info {
+  font-size: 0.9rem;
+  color: var(--text-secondary);
 }
 
 .pagination {

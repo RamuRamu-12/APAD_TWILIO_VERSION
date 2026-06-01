@@ -39,6 +39,14 @@ export interface SendOtpResponse {
   sms_preview?: string | null;
 }
 
+export interface TargetingRule {
+  id: number;
+  min_age: number;
+  max_age: number;
+  gender: string;
+  area: string;
+}
+
 export interface Campaign {
   id: number;
   name: string;
@@ -51,6 +59,7 @@ export interface Campaign {
   promo_suffix: string;
   priority: number;
   is_active: boolean;
+  targeting_rules?: TargetingRule[];
 }
 
 export interface CampaignRecommendation {

@@ -1,45 +1,34 @@
-import { Link, Outlet, useLocation } from "react-router-dom";
-import Navbar from "./Navbar";
-
-const links = [
-  { to: "/admin", label: "Overview", end: true },
-  { to: "/admin/campaigns", label: "Campaigns", end: false },
-  { to: "/admin/users", label: "Users", end: false },
-  { to: "/admin/analytics", label: "Analytics", end: false },
-];
-
-function isActive(pathname: string, to: string, end: boolean) {
-  if (end) return pathname === "/admin";
-  return pathname === to || pathname.startsWith(`${to}/`);
-}
+import { Link, Outlet, useLocation, useNavigate } from "react-router-dom";
 
 export default function AdminLayout() {
   const location = useLocation();
+  const navigate = useNavigate();
+
+  const isRegistry =
+    location.pathname === "/admin" || location.pathname === "/admin/campaigns";
+  const isUsers = location.pathname.startsWith("/admin/users");
 
   return (
     <div className="page-bg mesh-bg min-h-screen">
-      <Navbar />
       <div className="app-container" style={{ minHeight: "auto", justifyContent: "flex-start" }}>
-        <div className="admin-layout">
-          <aside className="admin-sidebar">
-            <p className="admin-sidebar-label">Management</p>
-            <nav>
-              {links.map((l) => (
-                <Link
-                  key={l.to}
-                  to={l.to}
-                  className={`admin-sidebar-link ${isActive(location.pathname, l.to, l.end) ? "active" : ""}`}
-                >
-                  {l.label}
-                </Link>
-              ))}
-            </nav>
-          </aside>
-
-          <div className="admin-main">
-            <Outlet />
+        <header className="header-nav">
+          <div className="logo">
+            <span aria-hidden>⚙️</span> Ad Control Center
           </div>
-        </div>
+          <nav className="nav-links">
+            <Link to="/admin" className={`nav-btn ${isRegistry ? "active" : ""}`}>
+              Ads Registry
+            </Link>
+            <Link to="/admin/users" className={`nav-btn ${isUsers ? "active" : ""}`}>
+              Users
+            </Link>
+            <button type="button" className="nav-btn" onClick={() => navigate("/dashboard")}>
+              Back to Portal
+            </button>
+          </nav>
+        </header>
+
+        <Outlet />
       </div>
     </div>
   );

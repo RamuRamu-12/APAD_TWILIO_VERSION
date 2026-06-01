@@ -1,4 +1,4 @@
-import { Route, Routes } from "react-router-dom";
+import { Navigate, Route, Routes } from "react-router-dom";
 import AppShell from "../components/layout/AppShell";
 import AdminLayout from "../components/layout/AdminLayout";
 import ProtectedRoute from "./ProtectedRoute";
@@ -16,10 +16,8 @@ import Offers from "../pages/portal/Offers";
 import Recommendations from "../pages/portal/Recommendations";
 import Profile from "../pages/portal/Profile";
 import AdminLogin from "../pages/admin/AdminLogin";
-import AdminHome from "../pages/admin/AdminHome";
-import Campaigns from "../pages/admin/Campaigns";
-import Users from "../pages/admin/Users";
-import Analytics from "../pages/admin/Analytics";
+import AdminControlCenter from "../pages/admin/AdminControlCenter";
+import AdminUsers from "../pages/admin/AdminUsers";
 
 export default function AppRoutes() {
   return (
@@ -76,10 +74,10 @@ export default function AppRoutes() {
           </ProtectedRoute>
         }
       >
-        <Route path="/admin" element={<AdminHome />} />
-        <Route path="/admin/campaigns" element={<Campaigns />} />
-        <Route path="/admin/users" element={<Users />} />
-        <Route path="/admin/analytics" element={<Analytics />} />
+        <Route path="/admin" element={<AdminControlCenter />} />
+        <Route path="/admin/campaigns" element={<AdminControlCenter />} />
+        <Route path="/admin/users" element={<AdminUsers />} />
+        <Route path="/admin/analytics" element={<Navigate to="/admin#analytics" replace />} />
       </Route>
     </Routes>
   );
