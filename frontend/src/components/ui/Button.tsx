@@ -1,4 +1,4 @@
-import type { ButtonHTMLAttributes, ReactNode } from "react";
+import type { ButtonHTMLAttributes } from "react";
 import { Link, type LinkProps } from "react-router-dom";
 
 type Variant = "primary" | "secondary" | "ghost";
