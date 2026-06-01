@@ -1,5 +1,5 @@
 import type { ButtonHTMLAttributes, ReactNode } from "react";
-import { Link } from "react-router-dom";
+import { Link, type LinkProps } from "react-router-dom";
 
 type Variant = "primary" | "secondary" | "ghost";
 
@@ -8,11 +8,9 @@ interface ButtonProps extends ButtonHTMLAttributes<HTMLButtonElement> {
   fullWidth?: boolean;
 }
 
-interface LinkButtonProps {
-  to: string;
+interface LinkButtonProps extends Omit<LinkProps, "className"> {
   variant?: Variant;
   fullWidth?: boolean;
-  children: ReactNode;
   className?: string;
 }
 
@@ -46,11 +44,13 @@ export function LinkButton({
   fullWidth,
   className = "",
   children,
+  ...rest
 }: LinkButtonProps) {
   return (
     <Link
       to={to}
       className={`${variants[variant]} ${fullWidth ? "w-full" : ""} ${className}`}
+      {...rest}
     >
       {children}
     </Link>
