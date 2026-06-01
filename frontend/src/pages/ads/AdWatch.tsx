@@ -1,7 +1,6 @@
 import { useEffect, useState } from "react";
-import { useNavigate, useSearchParams } from "react-router-dom";
+import { Link, useNavigate, useSearchParams } from "react-router-dom";
 import AdPlayer from "../../components/ads/AdPlayer";
-import PageHeader from "../../components/ui/PageHeader";
 import { apiPublic } from "../../lib/api";
 import { getFlow, saveFlow } from "../../lib/auth";
 import { trackEvent } from "../../lib/analytics";
@@ -23,6 +22,7 @@ export default function AdWatch() {
   const [payload, setPayload] = useState<AdWatchPayload | null>(null);
   const [error, setError] = useState("");
   const [completing, setCompleting] = useState(false);
+  const [playbackTime, setPlaybackTime] = useState(0);
 
   useEffect(() => {
     const parts: string[] = [];
@@ -87,36 +87,79 @@ export default function AdWatch() {
 
   if (error) {
     return (
-      <div className="card mx-auto max-w-lg text-center">
-        <p className="text-red-600">{error}</p>
+      <div className="glass-panel" style={{ maxWidth: "32rem", margin: "0 auto", textAlign: "center" }}>
+        <p className="text-error">{error}</p>
       </div>
     );
   }
 
   if (!payload) {
     return (
-      <div className="flex min-h-[40vh] items-center justify-center">
-        <div className="text-center">
-          <div className="mx-auto h-10 w-10 animate-spin rounded-full border-4 border-apad-200 border-t-apad-600" />
-          <p className="mt-4 text-slate-500">Loading…</p>
+      <div style={{ display: "flex", minHeight: "40vh", alignItems: "center", justifyContent: "center" }}>
+        <div style={{ textAlign: "center" }}>
+          <div
+            className="preview-dot"
+            style={{
+              width: 15,
+              height: 15,
+              margin: "0 auto 1rem",
+              backgroundColor: "var(--accent-cyan)",
+            }}
+          />
+          <p className="text-muted">Loading targeted advertisement…</p>
         </div>
       </div>
     );
   }
 
-  const title =
-    gate === "login" ? payload.campaign_name : "Verify to continue";
-  const description =
-    gate === "login"
-      ? "Please watch the full message to continue."
-      : "Watch this message to receive your verification code on SMS.";
+  const minSec = payload.min_watch_seconds;
+  const secondsLeft = Math.max(minSec - Math.floor(playbackTime), 0);
+  const progressPct = Math.min((playbackTime / minSec) * 100, 100);
+  const backTo = gate === "login" ? "/register" : "/generate-otp";
+  const backLabel = gate === "login" ? "Back to Register" : "Back";
 
   return (
-    <div className="mx-auto max-w-2xl">
-      <PageHeader title={title} description={description} />
-      <AdPlayer payload={payload} onComplete={onComplete} />
+    <div className="glass-panel animate-fade-in" style={{ maxWidth: "600px", margin: "2rem auto" }}>
+      <Link
+        to={backTo}
+        style={{
+          background: "none",
+          border: "none",
+          color: "var(--text-secondary)",
+          display: "flex",
+          alignItems: "center",
+          gap: "0.25rem",
+          marginBottom: "1.5rem",
+          fontSize: "0.9rem",
+          textDecoration: "none",
+        }}
+      >
+        ← {backLabel}
+      </Link>
+
+      <div style={{ marginBottom: "2rem", borderBottom: "1px solid var(--glass-border)", paddingBottom: "1.5rem" }}>
+        <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "0.75rem", flexWrap: "wrap", gap: "0.5rem" }}>
+          <span
+            className="enforced-ad-status"
+            style={{ display: "flex", alignItems: "center", gap: "0.5rem", fontSize: "1rem", textTransform: "uppercase" }}
+          >
+            <span className="preview-dot" style={{ backgroundColor: "var(--accent-rose)", width: 8, height: 8 }} />
+            Sponsored message
+          </span>
+          <span className="text-muted" style={{ fontSize: "0.95rem" }}>
+            Continue in <strong style={{ color: "var(--text-primary)" }}>{secondsLeft}s</strong>
+          </span>
+        </div>
+        <div className="enforced-progress-track">
+          <div className="enforced-progress-fill" style={{ width: `${progressPct}%` }} />
+        </div>
+      </div>
+
+      <AdPlayer payload={payload} onComplete={onComplete} onProgress={setPlaybackTime} />
       {completing && (
-        <p className="mt-4 text-center text-sm text-slate-500">Please wait…</p>
+        <p className="text-muted" style={{ marginTop: "1rem", textAlign: "center", fontSize: "0.9rem" }}>
+          Please wait…
+        </p>
       )}
     </div>
   );

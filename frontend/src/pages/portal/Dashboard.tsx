@@ -1,69 +1,132 @@
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { Link } from "react-router-dom";
-import PageHeader from "../../components/ui/PageHeader";
+import AdCard from "../../components/ads/AdCard";
 import { api } from "../../lib/api";
 import { useAuth } from "../../hooks/useAuth";
 import { trackEvent } from "../../lib/analytics";
+import { getInterests } from "../../lib/uiPrefs";
 import type { Campaign } from "../../types/api";
 
 export default function Dashboard() {
   const { user } = useAuth();
   const [campaigns, setCampaigns] = useState<Campaign[]>([]);
+  const [adsLoading, setAdsLoading] = useState(true);
+  const interests = getInterests();
+
+  const fetchAds = useCallback(() => {
+    setAdsLoading(true);
+    api
+      .get<Campaign[]>("/api/campaigns")
+      .then((r) => setCampaigns(r.data))
+      .catch(() => setCampaigns([]))
+      .finally(() => setAdsLoading(false));
+  }, []);
 
   useEffect(() => {
     trackEvent("portal_view", { userId: user?.id });
-    api.get<Campaign[]>("/api/campaigns").then((r) => setCampaigns(r.data.slice(0, 3)));
-  }, [user?.id]);
+    fetchAds();
+  }, [user?.id, fetchAds]);
 
   return (
     <div className="animate-fade-in">
-      <div className="rounded-3xl bg-gradient-to-r from-apad-700 via-apad-600 to-indigo-600 px-8 py-10 text-white shadow-glow">
-        <p className="text-sm font-medium text-apad-100">Welcome back</p>
-        <h1 className="mt-1 text-3xl font-bold">{user?.name}</h1>
-        <p className="mt-2 text-apad-100">
-          {user?.area} · Your offers are ready
-        </p>
-      </div>
+      <header className="header-nav">
+        <div className="logo">APAD Portal</div>
+      </header>
 
-      <PageHeader
-        className="mt-12"
-        title="Your offers"
-        description="Offers selected for your profile."
-      />
+      <div className="dashboard-grid">
+        <div className="glass-panel user-profile-panel" style={{ height: "fit-content" }}>
+          <div className="profile-avatar">{user?.name.charAt(0).toUpperCase()}</div>
+          <h2 style={{ textAlign: "center", marginBottom: "1rem", fontSize: "1.5rem" }}>{user?.name}</h2>
 
-      <div className="grid gap-6 md:grid-cols-3">
-        {campaigns.map((c) => (
-          <article
-            key={c.id}
-            className="group overflow-hidden rounded-2xl border border-slate-100 bg-white shadow-soft transition hover:-translate-y-1 hover:shadow-glow"
+          <div className="profile-field">
+            <span className="profile-field-label">Location</span>
+            <span className="profile-field-val">{user?.area}</span>
+          </div>
+          <div className="profile-field">
+            <span className="profile-field-label">Age</span>
+            <span className="profile-field-val">{user?.age} years</span>
+          </div>
+          <div className="profile-field">
+            <span className="profile-field-label">Gender</span>
+            <span className="profile-field-val" style={{ textTransform: "capitalize" }}>{user?.gender}</span>
+          </div>
+
+          <div
+            className="profile-field"
+            style={{ flexDirection: "column", gap: "0.4rem", alignItems: "flex-start" }}
           >
-            <img
-              src={c.image_url}
-              alt=""
-              className="h-40 w-full object-cover transition group-hover:scale-105"
-            />
-            <div className="p-5">
-              <h2 className="font-bold text-slate-900">{c.name}</h2>
-              <p className="mt-2 line-clamp-2 text-sm text-slate-500">
-                {c.description}
-              </p>
+            <span className="profile-field-label">Interests & Preferences</span>
+            <div style={{ display: "flex", flexWrap: "wrap", gap: "0.35rem" }}>
+              {interests.length > 0 ? (
+                interests.map((pref) => (
+                  <span key={pref} className="tag tag-interest">
+                    {pref}
+                  </span>
+                ))
+              ) : (
+                <span className="text-muted" style={{ fontSize: "0.8rem" }}>
+                  None selected
+                </span>
+              )}
             </div>
-          </article>
-        ))}
+          </div>
+
+          <div className="profile-field" style={{ borderBottom: "none" }}>
+            <span className="profile-field-label">Contact</span>
+            <span className="profile-field-val" style={{ fontSize: "0.85rem" }}>{user?.mobile}</span>
+          </div>
+        </div>
+
+        <div className="ads-section">
+          <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+            <h2 className="ads-title-header" style={{ marginBottom: 0 }}>
+              Personalized offers
+            </h2>
+            <button
+              type="button"
+              onClick={fetchAds}
+              style={{
+                background: "none",
+                border: "none",
+                color: "var(--accent-cyan)",
+                cursor: "pointer",
+                fontSize: "0.85rem",
+                fontWeight: 600,
+                fontFamily: "inherit",
+              }}
+            >
+              🔄 Refresh Offers
+            </button>
+          </div>
+          <p className="text-muted" style={{ fontSize: "0.95rem", marginBottom: "1rem" }}>
+            Welcome back. Here are offers selected for your profile.
+          </p>
+
+          {adsLoading ? (
+            <p className="text-muted" style={{ textAlign: "center", padding: "4rem" }}>
+              Loading secure advertisements...
+            </p>
+          ) : campaigns.length === 0 ? (
+            <div className="glass-panel" style={{ textAlign: "center", padding: "4rem" }}>
+              <p className="text-muted">No offers are available for you right now. Check back soon.</p>
+            </div>
+          ) : (
+            <div className="ads-grid">
+              {campaigns.map((c) => (
+                <AdCard key={c.id} campaign={c} />
+              ))}
+            </div>
+          )}
+        </div>
       </div>
 
-      <div className="mt-10 flex flex-wrap gap-4">
+      <div style={{ marginTop: "2rem", display: "flex", flexWrap: "wrap", gap: "1rem" }}>
         {[
-          { to: "/offers", label: "All offers", icon: "🎁" },
-          { to: "/recommendations", label: "For you", icon: "✨" },
-          { to: "/profile", label: "Profile", icon: "👤" },
+          { to: "/offers", label: "All offers" },
+          { to: "/recommendations", label: "Recommendations" },
+          { to: "/profile", label: "Profile" },
         ].map((item) => (
-          <Link
-            key={item.to}
-            to={item.to}
-            className="flex items-center gap-2 rounded-xl border border-slate-200 bg-white px-5 py-3 font-medium text-slate-700 shadow-sm transition hover:border-apad-300 hover:text-apad-700"
-          >
-            <span>{item.icon}</span>
+          <Link key={item.to} to={item.to} className="nav-btn">
             {item.label}
           </Link>
         ))}

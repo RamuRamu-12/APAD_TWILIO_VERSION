@@ -1,13 +1,14 @@
 import { FormEvent, useState } from "react";
-import { useNavigate } from "react-router-dom";
-import AuthLayout from "../../components/layout/AuthLayout";
-import { Button } from "../../components/ui/Button";
+import { Link, useNavigate } from "react-router-dom";
 import PhoneInput from "../../components/ui/PhoneInput";
+import { IconPhone } from "../../components/ui/FormIcons";
+import { useToast } from "../../context/ToastContext";
 import { apiPublic } from "../../lib/api";
 import { saveFlow } from "../../lib/auth";
 
 export default function GetOtp() {
   const navigate = useNavigate();
+  const { showToast } = useToast();
   const [mobile, setMobile] = useState("");
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
@@ -19,35 +20,46 @@ export default function GetOtp() {
     try {
       const { data } = await apiPublic.post("/api/login", { mobile });
       if (!data.exists) {
-        setError("User not found. Register first.");
+        const msg = "User not found. Register first.";
+        setError(msg);
+        showToast(msg, true);
         return;
       }
       saveFlow({ mobile });
       navigate(`/ad-watch?mobile=${encodeURIComponent(mobile)}&gate=login`);
     } catch {
-      setError("Something went wrong.");
+      const msg = "Something went wrong.";
+      setError(msg);
+      showToast(msg, true);
     } finally {
       setLoading(false);
     }
   };
 
   return (
-    <AuthLayout
-      title="Quick access"
-      subtitle="Enter your registered mobile number to continue."
-    >
-      <form onSubmit={submit} className="space-y-4">
-        <div>
-          <label className="mb-1.5 block text-sm font-medium text-slate-700">Mobile</label>
-          <PhoneInput value={mobile} onChange={setMobile} required />
+    <div className="glass-panel animate-fade-in" style={{ maxWidth: "520px", margin: "2rem auto" }}>
+      <h1 className="form-title">Quick access</h1>
+      <p className="form-subtitle">Enter your registered mobile number to continue.</p>
+      <form onSubmit={submit}>
+        <div className="form-group">
+          <label className="form-label">Mobile</label>
+          <div className="input-with-icon">
+            <PhoneInput value={mobile} onChange={setMobile} required />
+            <span className="input-icon-left" style={{ top: "50%", transform: "translateY(-50%)" }}>
+              <IconPhone />
+            </span>
+          </div>
         </div>
-        {error && (
-          <p className="rounded-lg bg-red-50 px-3 py-2 text-sm text-red-700">{error}</p>
-        )}
-        <Button type="submit" fullWidth disabled={loading}>
+        {error && <p className="text-error" style={{ marginBottom: "1rem" }}>{error}</p>}
+        <button type="submit" className="submit-btn" disabled={loading} style={{ width: "100%" }}>
           {loading ? "Please wait…" : "Continue"}
-        </Button>
+        </button>
       </form>
-    </AuthLayout>
+      <p className="text-muted" style={{ marginTop: "1.5rem", textAlign: "center" }}>
+        <Link to="/register" className="text-link">
+          Create account
+        </Link>
+      </p>
+    </div>
   );
 }

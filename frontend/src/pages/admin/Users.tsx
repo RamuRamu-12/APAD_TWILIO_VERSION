@@ -58,14 +58,14 @@ export default function Users() {
   };
 
   return (
-    <div>
+    <div className="animate-fade-in">
       <PageHeader title="Users" description="Add people who can receive advertisements." />
 
       <Card title="Add user" className="mb-8">
-        <form onSubmit={create} className="grid gap-4 sm:grid-cols-2">
+        <form onSubmit={create} style={{ display: "grid", gap: "1rem", gridTemplateColumns: "repeat(auto-fit, minmax(200px, 1fr))" }}>
           <FormField label="Full name" required>
             <input
-              className="input-field"
+              className="form-input"
               value={form.name}
               onChange={(e) => set("name", e.target.value)}
               required
@@ -83,7 +83,7 @@ export default function Users() {
           <FormField label="Email" required>
             <input
               type="email"
-              className="input-field"
+              className="form-input"
               placeholder="user@example.com"
               value={form.email}
               onChange={(e) => set("email", e.target.value)}
@@ -96,7 +96,7 @@ export default function Users() {
               type="number"
               min={1}
               max={120}
-              className="input-field"
+              className="form-input"
               value={form.age}
               onChange={(e) => set("age", Number(e.target.value))}
               required
@@ -105,7 +105,7 @@ export default function Users() {
 
           <FormField label="Gender" required>
             <select
-              className="input-field"
+              className="form-input form-select"
               value={form.gender}
               onChange={(e) => set("gender", e.target.value)}
             >
@@ -116,9 +116,9 @@ export default function Users() {
             </select>
           </FormField>
 
-          <FormField label="City" required className="sm:col-span-2">
+          <FormField label="City" required style={{ gridColumn: "1 / -1" }}>
             <input
-              className="input-field"
+              className="form-input"
               placeholder="Hyderabad"
               value={form.area}
               onChange={(e) => set("area", e.target.value)}
@@ -126,9 +126,9 @@ export default function Users() {
             />
           </FormField>
 
-          {error && <p className="text-sm text-red-600 sm:col-span-2">{error}</p>}
+          {error && <p className="text-error" style={{ gridColumn: "1 / -1" }}>{error}</p>}
 
-          <div className="sm:col-span-2">
+          <div style={{ gridColumn: "1 / -1" }}>
             <Button type="submit" disabled={loading}>
               {loading ? "Creating…" : "Create user"}
             </Button>
@@ -136,28 +136,26 @@ export default function Users() {
         </form>
       </Card>
 
-      <Card className="overflow-x-auto !p-0">
-        <table className="w-full text-left text-sm">
-          <thead className="border-b border-slate-100 bg-slate-50/80">
+      <div className="table-responsive">
+        <table className="admin-table">
+          <thead>
             <tr>
-              <th className="px-5 py-3 font-semibold text-slate-600">Name</th>
-              <th className="px-5 py-3 font-semibold text-slate-600">Mobile</th>
-              <th className="px-5 py-3 font-semibold text-slate-600">Email</th>
-              <th className="px-5 py-3 font-semibold text-slate-600">City</th>
-              <th className="px-5 py-3 font-semibold text-slate-600">Role</th>
+              <th>Name</th>
+              <th>Mobile</th>
+              <th>Email</th>
+              <th>City</th>
+              <th>Role</th>
             </tr>
           </thead>
-          <tbody className="divide-y divide-slate-50">
+          <tbody>
             {users.map((u) => (
-              <tr key={u.id} className="hover:bg-apad-50/30">
-                <td className="px-5 py-3 font-medium">{u.name}</td>
-                <td className="px-5 py-3 text-slate-600">{u.mobile}</td>
-                <td className="px-5 py-3 text-slate-600">{u.email}</td>
-                <td className="px-5 py-3 text-slate-600">{u.area}</td>
-                <td className="px-5 py-3">
-                  <span
-                    className={`badge ${u.role === "admin" ? "bg-apad-100 text-apad-800" : "bg-slate-100 text-slate-600"}`}
-                  >
+              <tr key={u.id}>
+                <td style={{ fontWeight: 600 }}>{u.name}</td>
+                <td>{u.mobile}</td>
+                <td>{u.email}</td>
+                <td>{u.area}</td>
+                <td>
+                  <span className={`ad-match-pill ${u.role === "admin" ? "med" : "high"}`}>
                     {u.role}
                   </span>
                 </td>
@@ -165,7 +163,7 @@ export default function Users() {
             ))}
           </tbody>
         </table>
-      </Card>
+      </div>
     </div>
   );
 }

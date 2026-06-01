@@ -5,9 +5,10 @@ import type { AdWatchPayload } from "../../types/api";
 interface Props {
   payload: AdWatchPayload;
   onComplete: (watchDuration: number) => void;
+  onProgress?: (seconds: number) => void;
 }
 
-export default function AdPlayer({ payload, onComplete }: Props) {
+export default function AdPlayer({ payload, onComplete, onProgress }: Props) {
   const videoRef = useRef<HTMLVideoElement>(null);
   const doneRef = useRef(false);
   const onCompleteRef = useRef(onComplete);
@@ -31,26 +32,34 @@ export default function AdPlayer({ payload, onComplete }: Props) {
   }, [payload.creative_url, payload.campaign_id]);
   const videoSrc = candidates[srcIndex] || DEFAULT_FALLBACK_VIDEO;
 
+  const reportProgress = useCallback(
+    (watched: number) => {
+      setSeconds(watched);
+      onProgress?.(watched);
+    },
+    [onProgress]
+  );
+
   const tryComplete = useCallback(
     (watched: number) => {
       if (doneRef.current) return;
       const w = Math.floor(watched);
+      reportProgress(watched);
       if (w < minSeconds) return;
 
       doneRef.current = true;
       setDone(true);
-      setSeconds(w);
       onCompleteRef.current(w);
     },
-    [minSeconds]
+    [minSeconds, reportProgress]
   );
 
-  // Image ads: count seconds on screen
   useEffect(() => {
     if (isVideo) return;
     const t = setInterval(() => {
       setSeconds((s) => {
         const next = s + 1;
+        onProgress?.(next);
         tryComplete(next);
         return next;
       });
@@ -58,7 +67,6 @@ export default function AdPlayer({ payload, onComplete }: Props) {
     return () => clearInterval(t);
   }, [isVideo, tryComplete]);
 
-  // Video: poll while playing (backup if timeupdate is sparse)
   useEffect(() => {
     if (!isVideo) return;
     const tick = () => {
@@ -71,7 +79,6 @@ export default function AdPlayer({ payload, onComplete }: Props) {
     return () => clearInterval(id);
   }, [isVideo, tryComplete]);
 
-  // Muted autoplay when allowed (user can unmute via controls)
   useEffect(() => {
     if (!isVideo) return;
     const v = videoRef.current;
@@ -82,7 +89,7 @@ export default function AdPlayer({ payload, onComplete }: Props) {
       playPromise
         .then(() => setPlaying(true))
         .catch(() => {
-          /* Browser blocked autoplay — user must press play */
+          /* Browser blocked autoplay */
         });
     }
   }, [isVideo, videoSrc]);
@@ -107,16 +114,33 @@ export default function AdPlayer({ payload, onComplete }: Props) {
   const remaining = Math.max(0, minSeconds - Math.floor(seconds));
 
   return (
-    <div className="card overflow-hidden !p-0">
-      <div className="border-b border-slate-100 bg-gradient-to-r from-apad-600 to-apad-500 px-6 py-4 text-white">
-        <span className="badge bg-white/20 text-white">Sponsored</span>
-        <h2 className="mt-2 text-xl font-bold">{payload.personalized_title}</h2>
-        <p className="mt-1 text-sm text-apad-100">{payload.description}</p>
+    <div style={{ overflow: "hidden" }}>
+      <div
+        style={{
+          borderBottom: "1px solid var(--glass-border)",
+          padding: "1rem 0",
+          marginBottom: "1rem",
+        }}
+      >
+        <span className="badge-brand">Sponsored message</span>
+        <h3 style={{ marginTop: "0.5rem", fontSize: "1.1rem" }}>{payload.personalized_title}</h3>
+        <p className="text-muted" style={{ marginTop: "0.25rem", fontSize: "0.85rem" }}>
+          {payload.description}
+        </p>
       </div>
 
-      <div className="p-4">
+      <div>
         {isVideo && !videoSrc ? (
-          <p className="rounded-xl bg-slate-100 px-4 py-8 text-center text-sm text-slate-600">
+          <p
+            className="text-muted"
+            style={{
+              borderRadius: "12px",
+              background: "rgba(0,0,0,0.3)",
+              padding: "2rem",
+              textAlign: "center",
+              fontSize: "0.9rem",
+            }}
+          >
             This video is unavailable. Please try again later.
           </p>
         ) : isVideo ? (
@@ -126,7 +150,13 @@ export default function AdPlayer({ payload, onComplete }: Props) {
               ref={videoRef}
               src={videoSrc}
               poster={payload.image_url}
-              className="aspect-video w-full rounded-xl bg-black object-contain shadow-inner"
+              style={{
+                width: "100%",
+                aspectRatio: "16/9",
+                borderRadius: "12px",
+                background: "#000",
+                objectFit: "contain",
+              }}
               controls
               playsInline
               preload="auto"
@@ -147,16 +177,17 @@ export default function AdPlayer({ payload, onComplete }: Props) {
               }}
             />
             {!playing && !done && !videoError && (
-              <p className="mt-2 text-center text-sm font-medium text-apad-600">
+              <p className="text-muted" style={{ marginTop: "0.5rem", textAlign: "center", fontSize: "0.85rem" }}>
                 Tap play and watch for at least {minSeconds} seconds
               </p>
             )}
             {videoError && (
-              <p className="mt-2 text-center text-sm text-amber-700">
-                Video could not load. Check your network or try again.{" "}
+              <p style={{ marginTop: "0.5rem", textAlign: "center", fontSize: "0.85rem", color: "var(--accent-rose)" }}>
+                Video could not load.{" "}
                 <button
                   type="button"
-                  className="font-semibold underline"
+                  className="text-link"
+                  style={{ background: "none", border: "none", cursor: "pointer", font: "inherit" }}
                   onClick={() => {
                     setVideoError(false);
                     setSrcIndex(0);
@@ -171,28 +202,28 @@ export default function AdPlayer({ payload, onComplete }: Props) {
           <img
             src={payload.creative_url || payload.image_url}
             alt={payload.campaign_name}
-            className="w-full rounded-xl object-cover shadow-inner"
+            style={{ width: "100%", borderRadius: "12px", objectFit: "cover" }}
           />
         )}
 
-        <div className="mt-4">
-          <div className="mb-2 flex justify-between text-sm">
-            <span className="text-slate-500">Watch progress</span>
-            <span className="font-medium text-apad-600">
+        <div style={{ marginTop: "1rem" }}>
+          <div style={{ display: "flex", justifyContent: "space-between", fontSize: "0.85rem", marginBottom: "0.5rem" }}>
+            <span className="text-muted">Watch progress</span>
+            <span style={{ color: "var(--accent-cyan)", fontWeight: 600 }}>
               {Math.floor(seconds)}s / {minSeconds}s required
               {!done && remaining > 0 && isVideo && playing && (
-                <span className="text-slate-400"> · {remaining}s left</span>
+                <span className="text-muted"> · {remaining}s left</span>
               )}
             </span>
           </div>
-          <div className="h-2 overflow-hidden rounded-full bg-slate-100">
+          <div className="enforced-progress-track">
             <div
-              className="h-full rounded-full bg-gradient-to-r from-apad-500 to-apad-400 transition-all duration-300"
+              className="enforced-progress-fill"
               style={{ width: `${done ? 100 : progress}%` }}
             />
           </div>
           {done && (
-            <p className="mt-3 text-center text-sm font-medium text-emerald-600">
+            <p style={{ marginTop: "0.75rem", textAlign: "center", fontSize: "0.9rem", color: "var(--accent-emerald)", fontWeight: 600 }}>
               Thank you. Redirecting…
             </p>
           )}

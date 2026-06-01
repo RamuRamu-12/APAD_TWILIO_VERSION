@@ -75,28 +75,28 @@ export default function Campaigns() {
   };
 
   return (
-    <div>
+    <div className="animate-fade-in">
       <PageHeader
         title="Advertisements"
         description="Create ads with fixed copy. Users are matched by age, gender, and city only."
       />
 
       <Card title="New advertisement" className="mb-8">
-        <form onSubmit={create} className="grid gap-4 sm:grid-cols-2">
-          <p className="text-sm font-semibold text-slate-700 sm:col-span-2">Ad content</p>
+        <form onSubmit={create} style={{ display: "grid", gap: "1rem", gridTemplateColumns: "repeat(auto-fit, minmax(220px, 1fr))" }}>
+          <p className="form-label" style={{ gridColumn: "1 / -1" }}>Ad content</p>
 
-          <FormField label="Advertisement name" required className="sm:col-span-2">
+          <FormField label="Advertisement name" required style={{ gridColumn: "1 / -1" }}>
             <input
-              className="input-field"
+              className="form-input"
               value={form.name}
               onChange={(e) => set("name", e.target.value)}
               required
             />
           </FormField>
 
-          <FormField label="Headline (shown on the ad)" required className="sm:col-span-2">
+          <FormField label="Headline (shown on the ad)" required style={{ gridColumn: "1 / -1" }}>
             <input
-              className="input-field"
+              className="form-input"
               placeholder="e.g. 30% off Bali getaways"
               value={form.title_template}
               onChange={(e) => set("title_template", e.target.value)}
@@ -104,9 +104,10 @@ export default function Campaigns() {
             />
           </FormField>
 
-          <FormField label="Description" required className="sm:col-span-2">
+          <FormField label="Description" required style={{ gridColumn: "1 / -1" }}>
             <textarea
-              className="input-field min-h-[72px]"
+              className="form-input"
+              style={{ minHeight: "72px" }}
               placeholder="Offer details shown under the video"
               value={form.description}
               onChange={(e) => set("description", e.target.value)}
@@ -114,38 +115,38 @@ export default function Campaigns() {
             />
           </FormField>
 
-          <FormField label="SMS line (optional)" className="sm:col-span-2">
+          <FormField label="SMS line (optional)" style={{ gridColumn: "1 / -1" }}>
             <input
-              className="input-field"
+              className="form-input"
               placeholder="Short text sent with OTP"
               value={form.promo_suffix}
               onChange={(e) => set("promo_suffix", e.target.value)}
             />
           </FormField>
 
-          <FormField label="Preview image URL" required className="sm:col-span-2">
+          <FormField label="Preview image URL" required style={{ gridColumn: "1 / -1" }}>
             <input
               type="url"
-              className="input-field"
+              className="form-input"
               value={form.image_url}
               onChange={(e) => set("image_url", e.target.value)}
               required
             />
           </FormField>
 
-          <FormField label="Video URL" required className="sm:col-span-2">
+          <FormField label="Video URL" required style={{ gridColumn: "1 / -1" }}>
             <input
               type="url"
-              className="input-field"
+              className="form-input"
               value={form.creative_url}
               onChange={(e) => set("creative_url", e.target.value)}
               required
             />
           </FormField>
 
-          <FormField label="Ad type">
+          <FormField label="Media format">
             <select
-              className="input-field"
+              className="form-input form-select"
               value={form.creative_type}
               onChange={(e) => set("creative_type", e.target.value)}
             >
@@ -159,28 +160,28 @@ export default function Campaigns() {
               type="number"
               min={1}
               max={120}
-              className="input-field"
+              className="form-input"
               value={form.min_watch_seconds}
               onChange={(e) => set("min_watch_seconds", Number(e.target.value))}
               required
             />
           </FormField>
 
-          <FormField label="Priority (if several ads match one user)">
+          <FormField label="Ranking (when multiple campaigns match)">
             <input
               type="number"
               min={0}
               max={100}
-              className="input-field"
+              className="form-input"
               value={form.priority}
               onChange={(e) => set("priority", Number(e.target.value))}
             />
           </FormField>
 
-          <p className="border-t border-slate-100 pt-4 text-sm font-semibold text-slate-700 sm:col-span-2">
+          <p className="form-label" style={{ gridColumn: "1 / -1", borderTop: "1px solid var(--glass-border)", paddingTop: "1rem", marginTop: "0.5rem" }}>
             Audience matching
           </p>
-          <p className="-mt-2 text-xs text-slate-500 sm:col-span-2">
+          <p className="text-muted" style={{ gridColumn: "1 / -1", fontSize: "0.8rem", marginTop: "-0.5rem" }}>
             Uses the user&apos;s profile from registration (age, gender, city). Leave city blank or
             &quot;any&quot; for all cities.
           </p>
@@ -190,7 +191,7 @@ export default function Campaigns() {
               type="number"
               min={0}
               max={120}
-              className="input-field"
+              className="form-input"
               value={form.min_age}
               onChange={(e) => set("min_age", Number(e.target.value))}
             />
@@ -201,7 +202,7 @@ export default function Campaigns() {
               type="number"
               min={0}
               max={120}
-              className="input-field"
+              className="form-input"
               value={form.max_age}
               onChange={(e) => set("max_age", Number(e.target.value))}
             />
@@ -209,7 +210,7 @@ export default function Campaigns() {
 
           <FormField label="Gender">
             <select
-              className="input-field"
+              className="form-input form-select"
               value={form.gender}
               onChange={(e) => set("gender", e.target.value)}
             >
@@ -222,16 +223,16 @@ export default function Campaigns() {
 
           <FormField label="City">
             <input
-              className="input-field"
+              className="form-input"
               placeholder="any"
               value={form.area}
               onChange={(e) => set("area", e.target.value)}
             />
           </FormField>
 
-          {error && <p className="text-sm text-red-600 sm:col-span-2">{error}</p>}
+          {error && <p className="text-error" style={{ gridColumn: "1 / -1" }}>{error}</p>}
 
-          <div className="sm:col-span-2">
+          <div style={{ gridColumn: "1 / -1" }}>
             <Button type="submit" disabled={loading}>
               {loading ? "Creating…" : "Create advertisement"}
             </Button>
@@ -241,24 +242,36 @@ export default function Campaigns() {
 
       <Card title="Active advertisements">
         {campaigns.length === 0 ? (
-          <p className="text-sm text-slate-500">No advertisements yet.</p>
+          <p className="text-muted">No advertisements yet.</p>
         ) : (
-          <ul className="divide-y divide-slate-100">
-            {campaigns.map((c) => (
-              <li
-                key={c.id}
-                className="flex flex-wrap items-start justify-between gap-3 py-4 first:pt-0 last:pb-0"
-              >
-                <div>
-                  <p className="font-bold text-slate-900">{c.name}</p>
-                  <p className="mt-1 text-sm text-slate-600">{c.title_template}</p>
-                  <p className="text-xs text-slate-400">
-                    ID {c.id} · priority {c.priority} · {c.min_watch_seconds}s watch
-                  </p>
-                </div>
-              </li>
-            ))}
-          </ul>
+          <div className="table-responsive">
+            <table className="admin-table">
+              <thead>
+                <tr>
+                  <th>Name</th>
+                  <th>Headline</th>
+                  <th>Ranking</th>
+                  <th>Min. view (s)</th>
+                  <th>Status</th>
+                </tr>
+              </thead>
+              <tbody>
+                {campaigns.map((c) => (
+                  <tr key={c.id}>
+                    <td style={{ fontWeight: 600 }}>{c.name}</td>
+                    <td>{c.title_template}</td>
+                    <td>{c.priority}</td>
+                    <td>{c.min_watch_seconds}s</td>
+                    <td>
+                      <span className={`ad-match-pill ${c.is_active ? "high" : "med"}`}>
+                        {c.is_active ? "Active" : "Inactive"}
+                      </span>
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
         )}
       </Card>
     </div>

@@ -1,15 +1,16 @@
 import { FormEvent, useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
-import AuthLayout from "../../components/layout/AuthLayout";
-import { Button } from "../../components/ui/Button";
 import PhoneInput from "../../components/ui/PhoneInput";
-import { apiPublic } from "../../lib/api";
 import { useAuth } from "../../context/AuthContext";
+import { useToast } from "../../context/ToastContext";
+import { apiPublic } from "../../lib/api";
+import { config } from "../../lib/config";
 import type { AuthResponse } from "../../types/api";
 
 export default function AdminLogin() {
   const navigate = useNavigate();
   const { login } = useAuth();
+  const { showToast } = useToast();
   const [mobile, setMobile] = useState("");
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");
@@ -31,39 +32,51 @@ export default function AdminLogin() {
         (err as { response?: { data?: { detail?: string } } })?.response?.data
           ?.detail || "Invalid mobile or password";
       setError(String(msg));
+      showToast(String(msg), true);
     } finally {
       setLoading(false);
     }
   };
 
   return (
-    <AuthLayout title="Admin sign in" subtitle="Mobile and password only.">
-      <form onSubmit={submit} className="space-y-4">
-        <div>
-          <label className="mb-1.5 block text-sm font-medium text-slate-700">Mobile</label>
+    <div className="glass-panel animate-fade-in" style={{ maxWidth: "520px", margin: "2rem auto" }}>
+      <h1
+        className="form-title"
+        style={{
+          background: "var(--gradient-neon)",
+          WebkitBackgroundClip: "text",
+          WebkitTextFillColor: "transparent",
+        }}
+      >
+        Administrator sign-in
+      </h1>
+      <p className="form-subtitle">Authorized staff access for {config.appName}</p>
+      <form onSubmit={submit}>
+        <div className="form-group">
+          <label className="form-label">Mobile</label>
           <PhoneInput value={mobile} onChange={setMobile} required />
         </div>
-        <div>
-          <label className="mb-1.5 block text-sm font-medium text-slate-700">Password</label>
+        <div className="form-group">
+          <label className="form-label">Password</label>
           <input
             type="password"
-            className="input-field"
+            className="form-input"
             value={password}
             onChange={(e) => setPassword(e.target.value)}
             required
           />
         </div>
-        {error && <p className="text-sm text-red-600">{error}</p>}
-        <Button type="submit" className="w-full" disabled={loading}>
+        {error && <p className="text-error" style={{ marginBottom: "1rem" }}>{error}</p>}
+        <button type="submit" className="submit-btn" disabled={loading} style={{ width: "100%" }}>
           {loading ? "Signing in…" : "Sign in"}
-        </Button>
+        </button>
       </form>
-      <p className="mt-6 text-center text-sm text-slate-500">
+      <p className="text-muted" style={{ marginTop: "1.5rem", textAlign: "center", fontSize: "0.9rem" }}>
         End user?{" "}
-        <Link to="/login" className="font-medium text-apad-600 hover:text-apad-700">
-          Consumer login
+        <Link to="/login" className="text-link">
+          Consumer sign-in
         </Link>
       </p>
-    </AuthLayout>
+    </div>
   );
 }

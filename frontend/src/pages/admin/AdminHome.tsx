@@ -2,29 +2,55 @@ import { Link } from "react-router-dom";
 import PageHeader from "../../components/ui/PageHeader";
 
 const cards = [
-  { to: "/admin/campaigns", title: "Advertisements", desc: "Create ads & audience rules", color: "from-apad-600 to-indigo-600" },
-  { to: "/admin/users", title: "Users", desc: "Create accounts & view audience", color: "from-indigo-500 to-indigo-600" },
-  { to: "/admin/analytics", title: "Analytics", desc: "Funnel events & conversions", color: "from-violet-500 to-violet-600" },
+  {
+    to: "/admin/campaigns",
+    title: "Campaigns",
+    desc: "Create and manage partner campaigns, creative assets, and audience rules.",
+  },
+  {
+    to: "/admin/users",
+    title: "User accounts",
+    desc: "Add and review registered users and their profile details.",
+  },
+  {
+    to: "/admin/analytics",
+    title: "Analytics",
+    desc: "Review sign-in funnel events and engagement metrics.",
+  },
 ];
 
 export default function AdminHome() {
   return (
-    <div>
+    <div className="animate-fade-in">
       <PageHeader
-        badge="Admin console"
-        title="Control center"
-        description="Create advertisements, set audience rules, manage users, and view performance."
+        title="Overview"
+        description="Manage campaigns, users, and performance from one place."
       />
-      <div className="grid gap-6 sm:grid-cols-3">
+      <div className="ads-grid">
         {cards.map((c) => (
           <Link
             key={c.to}
             to={c.to}
-            className={`rounded-2xl bg-gradient-to-br ${c.color} p-6 text-white shadow-soft transition hover:-translate-y-1 hover:shadow-glow`}
+            className="glass-panel"
+            style={{
+              textDecoration: "none",
+              background: "linear-gradient(135deg, rgba(0,242,254,0.06) 0%, rgba(138,43,226,0.1) 100%)",
+              transition: "transform 0.2s ease, border-color 0.2s ease",
+            }}
+            onMouseEnter={(e) => {
+              e.currentTarget.style.transform = "translateY(-4px)";
+              e.currentTarget.style.borderColor = "rgba(0, 242, 254, 0.25)";
+            }}
+            onMouseLeave={(e) => {
+              e.currentTarget.style.transform = "";
+              e.currentTarget.style.borderColor = "";
+            }}
           >
-            <h2 className="text-lg font-bold">{c.title}</h2>
-            <p className="mt-2 text-sm text-white/80">{c.desc}</p>
-            <span className="mt-4 inline-block text-sm font-semibold">Open →</span>
+            <h2 style={{ fontSize: "1.15rem", marginBottom: "0.5rem" }}>{c.title}</h2>
+            <p className="text-muted" style={{ fontSize: "0.9rem", lineHeight: 1.5 }}>{c.desc}</p>
+            <span className="text-link" style={{ marginTop: "1rem", display: "inline-block", fontSize: "0.9rem", fontWeight: 600 }}>
+              Open
+            </span>
           </Link>
         ))}
       </div>

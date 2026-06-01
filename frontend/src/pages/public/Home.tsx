@@ -10,102 +10,114 @@ const steps = [
 
 const features = [
   {
-    icon: "🎯",
-    title: "Relevant advertisements",
-    desc: "Offers aligned with your age, city, and interests.",
+    title: "Relevant offers",
+    desc: "Content aligned with your profile, location, and preferences.",
   },
   {
-    icon: "🔐",
     title: "Secure sign-in",
-    desc: "OTP verification keeps your account protected.",
+    desc: "One-time password verification protects your account.",
   },
   {
-    icon: "📊",
-    title: "Trusted brands",
-    desc: "Travel, finance, retail, and wellness partners.",
+    title: "Trusted partners",
+    desc: "Offers from travel, finance, retail, and wellness brands.",
   },
 ];
 
 export default function Home() {
   return (
     <div className="animate-fade-in">
-      <section className="relative overflow-hidden rounded-3xl border border-white/60 bg-white/50 px-6 py-16 shadow-card backdrop-blur-sm sm:px-12 sm:py-24">
-        <div className="pointer-events-none absolute -right-20 -top-20 h-64 w-64 rounded-full bg-apad-400/20 blur-3xl" />
-        <div className="pointer-events-none absolute -bottom-16 -left-16 h-48 w-48 rounded-full bg-accent-400/15 blur-3xl" />
-
-        <div className="relative mx-auto max-w-3xl text-center">
-          <span className="badge-brand mb-6">Offers · Verify · Access</span>
-          <h1 className="text-4xl font-extrabold tracking-tight text-slate-900 sm:text-5xl md:text-6xl">
-            Watch. Verify.{" "}
-            <span className="bg-gradient-to-r from-apad-600 to-indigo-500 bg-clip-text text-transparent">
-              Access.
-            </span>
-          </h1>
-          <p className="mx-auto mt-6 max-w-2xl text-lg leading-relaxed text-slate-600">
-            {config.appName} brings you curated brand offers and a simple mobile sign-in
-            so you can unlock deals that fit your profile.
-          </p>
-
-          <div className="mt-10 flex flex-col items-center justify-center gap-4 sm:flex-row">
-            <LinkButton to="/register" className="min-w-[180px]">
-              Create account
-            </LinkButton>
-            <LinkButton to="/login" variant="secondary" className="min-w-[180px]">
-              Sign in
-            </LinkButton>
-          </div>
+      <section className="glass-panel" style={{ textAlign: "center", padding: "3rem 2rem" }}>
+        <span className="badge-brand" style={{ marginBottom: "1.5rem", display: "inline-flex" }}>
+          {config.tagline}
+        </span>
+        <h1 style={{ fontSize: "clamp(2rem, 5vw, 3.5rem)", fontWeight: 800, lineHeight: 1.1 }}>
+          Watch. Verify. <span className="hero-gradient-text">Access.</span>
+        </h1>
+        <p className="text-muted" style={{ margin: "1.5rem auto 0", maxWidth: "36rem", fontSize: "1.1rem", lineHeight: 1.6 }}>
+          {config.appName} helps you discover partner offers with a simple, secure mobile sign-in.
+        </p>
+        <div style={{ marginTop: "2.5rem", display: "flex", flexWrap: "wrap", gap: "1rem", justifyContent: "center" }}>
+          <LinkButton to="/register" style={{ minWidth: "180px" }}>
+            Create account
+          </LinkButton>
+          <LinkButton to="/login" variant="secondary" style={{ minWidth: "180px" }}>
+            Sign in
+          </LinkButton>
         </div>
       </section>
 
-      <section className="mt-20">
-        <h2 className="text-center text-sm font-bold uppercase tracking-widest text-apad-600">
-          How it works
-        </h2>
-        <div className="mt-8 grid gap-6 md:grid-cols-3">
+      <section style={{ marginTop: "4rem" }}>
+        <h2 className="ads-title-header" style={{ justifyContent: "center" }}>How it works</h2>
+        <div className="ads-grid" style={{ marginTop: "1.5rem" }}>
           {steps.map((s) => (
             <div
               key={s.num}
-              className="card group text-center transition hover:-translate-y-1 hover:shadow-glow"
+              className="glass-panel"
+              style={{
+                textAlign: "center",
+                padding: "1.5rem",
+                transition: "transform 0.3s ease, box-shadow 0.3s ease",
+              }}
+              onMouseEnter={(e) => {
+                e.currentTarget.style.transform = "translateY(-6px)";
+                e.currentTarget.style.boxShadow = "0 12px 30px rgba(0, 0, 0, 0.5)";
+              }}
+              onMouseLeave={(e) => {
+                e.currentTarget.style.transform = "";
+                e.currentTarget.style.boxShadow = "";
+              }}
             >
-              <span className="text-3xl font-extrabold text-apad-200 group-hover:text-apad-400">
+              <span className="hero-gradient-text" style={{ fontSize: "2rem", fontWeight: 800 }}>
                 {s.num}
               </span>
-              <h3 className="mt-2 text-lg font-bold text-slate-900">{s.title}</h3>
-              <p className="mt-2 text-sm text-slate-500">{s.desc}</p>
+              <h3 style={{ marginTop: "0.5rem", fontSize: "1.1rem" }}>{s.title}</h3>
+              <p className="text-muted" style={{ marginTop: "0.5rem", fontSize: "0.9rem" }}>{s.desc}</p>
             </div>
           ))}
         </div>
       </section>
 
-      <section className="mt-20">
-        <h2 className="text-center text-2xl font-bold text-slate-900">Why APAD</h2>
-        <div className="mt-10 grid gap-6 sm:grid-cols-3">
+      <section style={{ marginTop: "4rem" }}>
+        <h2 style={{ textAlign: "center", fontSize: "1.5rem", marginBottom: "1.5rem" }}>Why {config.appName}</h2>
+        <div className="ads-grid">
           {features.map((f) => (
-            <div key={f.title} className="rounded-2xl border border-slate-100 bg-white p-6 shadow-soft">
-              <span className="text-3xl">{f.icon}</span>
-              <h3 className="mt-4 font-bold text-slate-900">{f.title}</h3>
-              <p className="mt-2 text-sm leading-relaxed text-slate-500">{f.desc}</p>
+            <div
+              key={f.title}
+              className="glass-panel"
+              style={{ padding: "1.5rem", transition: "transform 0.3s ease, border-color 0.3s" }}
+              onMouseEnter={(e) => {
+                e.currentTarget.style.transform = "translateY(-4px)";
+                e.currentTarget.style.borderColor = "rgba(0, 242, 254, 0.25)";
+              }}
+              onMouseLeave={(e) => {
+                e.currentTarget.style.transform = "";
+                e.currentTarget.style.borderColor = "";
+              }}
+            >
+              <h3 style={{ fontSize: "1.1rem" }}>{f.title}</h3>
+              <p className="text-muted" style={{ marginTop: "0.5rem", fontSize: "0.9rem", lineHeight: 1.5 }}>
+                {f.desc}
+              </p>
             </div>
           ))}
         </div>
       </section>
 
-      <section className="mt-20 rounded-3xl bg-gradient-to-r from-apad-700 to-apad-500 px-8 py-12 text-center text-white shadow-glow">
-        <h2 className="text-2xl font-bold sm:text-3xl">Start exploring offers</h2>
-        <p className="mx-auto mt-3 max-w-lg text-apad-100">
-          Sign in with your mobile number and discover deals from leading brands.
+      <section
+        className="glass-panel"
+        style={{
+          marginTop: "4rem",
+          textAlign: "center",
+          background: "linear-gradient(135deg, rgba(0,242,254,0.08) 0%, rgba(138,43,226,0.12) 100%)",
+        }}
+      >
+        <h2 style={{ fontSize: "1.75rem" }}>Get started today</h2>
+        <p className="text-muted" style={{ margin: "0.75rem auto 0", maxWidth: "28rem" }}>
+          Create an account in minutes and unlock offers tailored to you.
         </p>
-        <Link
-          to="/login"
-          className="mt-8 inline-block rounded-xl bg-white px-8 py-3 font-semibold text-apad-700 shadow-lg transition hover:bg-apad-50"
-        >
-          Sign in now
+        <Link to="/register" className="submit-btn" style={{ marginTop: "2rem", display: "inline-flex", width: "auto" }}>
+          Create account
         </Link>
-        <p className="mt-4 text-sm text-apad-100">
-          <Link to="/admin/login" className="underline hover:text-white">
-            Business login
-          </Link>
-        </p>
       </section>
     </div>
   );

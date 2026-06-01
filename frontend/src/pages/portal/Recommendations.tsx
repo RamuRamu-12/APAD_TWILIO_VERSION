@@ -15,23 +15,20 @@ export default function Recommendations() {
   }, []);
 
   return (
-    <div>
+    <div className="animate-fade-in">
       <PageHeader title="Recommended for you" />
-      {loading && <p className="text-sm text-slate-500">Loading…</p>}
+      {loading && <p className="text-muted">Loading…</p>}
       {!loading && items.length === 0 && (
-        <p className="text-sm text-slate-500">No matching offers right now.</p>
+        <p className="text-muted">No matching offers right now.</p>
       )}
-      <ul className="space-y-4">
+      <ul style={{ display: "flex", flexDirection: "column", gap: "1rem", listStyle: "none", padding: 0 }}>
         {items.map((item) => (
-          <li
-            key={item.id}
-            className="flex items-center justify-between rounded-2xl border border-slate-100 bg-white px-6 py-4 shadow-soft"
-          >
+          <li key={item.id} className="glass-panel" style={{ padding: "1.25rem 1.5rem", display: "flex", justifyContent: "space-between", alignItems: "center" }}>
             <div>
-              <span className="font-medium text-slate-800">{item.personalized_title}</span>
-              <p className="text-sm text-slate-500">{item.name}</p>
+              <span style={{ fontWeight: 600 }}>{item.personalized_title}</span>
+              <p className="text-muted" style={{ fontSize: "0.85rem", marginTop: "0.25rem" }}>{item.name}</p>
             </div>
-            <span className="badge-brand">Match</span>
+            <span className="ad-match-pill high">For you</span>
           </li>
         ))}
       </ul>

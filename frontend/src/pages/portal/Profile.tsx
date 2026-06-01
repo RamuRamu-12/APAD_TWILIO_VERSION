@@ -1,5 +1,4 @@
 import { useAuth } from "../../hooks/useAuth";
-import Card from "../../components/ui/Card";
 import PageHeader from "../../components/ui/PageHeader";
 
 export default function Profile() {
@@ -10,25 +9,25 @@ export default function Profile() {
     { label: "Name", value: user.name },
     { label: "Mobile", value: user.mobile },
     { label: "Email", value: user.email },
-    { label: "Age", value: String(user.age) },
+    { label: "Age", value: `${user.age} yrs` },
     { label: "Gender", value: user.gender },
     { label: "Area", value: user.area },
     { label: "Role", value: user.role },
   ];
 
   return (
-    <div>
+    <div className="animate-fade-in">
       <PageHeader title="Profile" description="Your APAD account details." />
-      <Card className="max-w-md">
-        <dl className="divide-y divide-slate-100">
-          {rows.map((r) => (
-            <div key={r.label} className="flex justify-between py-4 first:pt-0 last:pb-0">
-              <dt className="text-sm font-medium text-slate-500">{r.label}</dt>
-              <dd className="text-sm font-semibold text-slate-900">{r.value}</dd>
-            </div>
-          ))}
-        </dl>
-      </Card>
+      <div className="glass-panel user-profile-panel" style={{ maxWidth: "480px" }}>
+        <div className="profile-avatar">{user.name.charAt(0).toUpperCase()}</div>
+        <h2 style={{ textAlign: "center", marginBottom: "1rem" }}>{user.name}</h2>
+        {rows.map((r) => (
+          <div key={r.label} className="profile-field">
+            <span className="profile-field-label">{r.label}</span>
+            <span className="profile-field-val">{r.value}</span>
+          </div>
+        ))}
+      </div>
     </div>
   );
 }

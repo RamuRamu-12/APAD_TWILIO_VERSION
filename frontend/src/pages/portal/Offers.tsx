@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
 import PageHeader from "../../components/ui/PageHeader";
+import AdCard from "../../components/ads/AdCard";
 import { api } from "../../lib/api";
 import type { Campaign } from "../../types/api";
 import { useAuth } from "../../hooks/useAuth";
@@ -13,17 +14,11 @@ export default function Offers() {
   }, []);
 
   return (
-    <div>
+    <div className="animate-fade-in">
       <PageHeader title="Your offers" description={`Curated for ${user?.name}`} />
-      <div className="grid gap-6 sm:grid-cols-2">
+      <div className="ads-grid">
         {campaigns.map((c) => (
-          <div key={c.id} className="card">
-            <span className="badge-brand">Limited</span>
-            <h2 className="mt-3 text-lg font-bold text-slate-900">
-              {c.title_template}
-            </h2>
-            <p className="mt-2 text-sm text-slate-500">{c.promo_suffix}</p>
-          </div>
+          <AdCard key={c.id} campaign={c} />
         ))}
       </div>
     </div>

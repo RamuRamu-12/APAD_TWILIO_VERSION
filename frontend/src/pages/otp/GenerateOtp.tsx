@@ -1,7 +1,5 @@
 import { useEffect, useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
-import AuthLayout from "../../components/layout/AuthLayout";
-import { Button } from "../../components/ui/Button";
 import { apiPublic } from "../../lib/api";
 import { getFlow } from "../../lib/auth";
 
@@ -21,9 +19,9 @@ export default function GenerateOtp() {
         const q = flow.token
           ? `token=${encodeURIComponent(flow.token)}`
           : `mobile=${encodeURIComponent(flow.mobile!)}`;
-        const { data } = await apiPublic.get<{
-          login_ad_completed: boolean;
-        }>(`/api/ad/status?${q}`);
+        const { data } = await apiPublic.get<{ login_ad_completed: boolean }>(
+          `/api/ad/status?${q}`
+        );
         if (!data.login_ad_completed) {
           setError("Please complete the sponsored message to continue.");
           return;
@@ -45,25 +43,25 @@ export default function GenerateOtp() {
 
   if (error) {
     return (
-      <AuthLayout title="Sign in" subtitle="">
-        <p className="rounded-lg bg-red-50 px-3 py-2 text-center text-sm text-red-700">
-          {error}
-        </p>
-        <Link to="/login" className="mt-4 block text-center text-apad-600">
+      <div className="glass-panel" style={{ maxWidth: "520px", margin: "2rem auto" }}>
+        <h1 className="form-title">Mobile verification</h1>
+        <p className="text-error" style={{ textAlign: "center" }}>{error}</p>
+        <Link to="/login" className="text-link" style={{ display: "block", textAlign: "center", marginTop: "1rem" }}>
           Back to sign in
         </Link>
-      </AuthLayout>
+      </div>
     );
   }
 
   return (
-    <AuthLayout
-      title="Mobile verification"
-      subtitle="Watch a brief sponsored message. We will then send a one-time password to your registered number."
-    >
-      <Button type="button" fullWidth disabled={!ready} onClick={continueFlow}>
+    <div className="glass-panel animate-fade-in" style={{ maxWidth: "520px", margin: "2rem auto" }}>
+      <h1 className="form-title">Mobile verification</h1>
+      <p className="form-subtitle">
+        Watch a brief sponsored message. We will then send a one-time password to your registered number.
+      </p>
+      <button type="button" className="submit-btn" disabled={!ready} onClick={continueFlow} style={{ width: "100%" }}>
         {ready ? "Continue" : "Please wait…"}
-      </Button>
-    </AuthLayout>
+      </button>
+    </div>
   );
 }

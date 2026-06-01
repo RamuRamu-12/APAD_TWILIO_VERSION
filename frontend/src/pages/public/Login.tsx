@@ -1,18 +1,22 @@
 import { FormEvent, useState } from "react";
 import { Link, useLocation, useNavigate } from "react-router-dom";
-import AuthLayout from "../../components/layout/AuthLayout";
-import { Button } from "../../components/ui/Button";
 import PhoneInput from "../../components/ui/PhoneInput";
+import { IconPhone, IconCheck } from "../../components/ui/FormIcons";
+import { useToast } from "../../context/ToastContext";
 import { apiPublic } from "../../lib/api";
 import { saveFlow } from "../../lib/auth";
+import { config } from "../../lib/config";
 
 export default function Login() {
   const navigate = useNavigate();
   const location = useLocation();
+  const { showToast } = useToast();
   const preset = (location.state as { mobile?: string })?.mobile || "";
   const [mobile, setMobile] = useState(preset);
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
+
+  const isMobileValid = mobile.trim().length >= 8;
 
   const submit = async (e: FormEvent) => {
     e.preventDefault();
@@ -24,53 +28,76 @@ export default function Login() {
         requires_admin_login?: boolean;
       }>("/api/login", { mobile });
       if (!data.exists) {
-        setError("Mobile not registered. Please create an account first.");
+        const msg = "Mobile not registered. Please create an account first.";
+        setError(msg);
+        showToast(msg, true);
         return;
       }
       if (data.requires_admin_login) {
-        setError("This number is for admin. Use Admin login instead.");
+        const msg = "This number is for admin. Use Admin login instead.";
+        setError(msg);
+        showToast(msg, true);
         return;
       }
       saveFlow({ mobile });
       navigate(`/ad-watch?mobile=${encodeURIComponent(mobile)}&gate=login`);
     } catch {
-      setError("Could not verify your number. Try again.");
+      const msg = "Could not verify your number. Try again.";
+      setError(msg);
+      showToast(msg, true);
     } finally {
       setLoading(false);
     }
   };
 
   return (
-    <AuthLayout
-      title="Sign in"
-      subtitle="Enter your mobile number to view relevant offers and sign in securely."
-    >
-      <p className="mb-4 text-center text-sm text-slate-500">
-        Admin?{" "}
-        <Link to="/admin/login" className="font-medium text-apad-600 hover:text-apad-700">
-          Admin login
-        </Link>
+    <div className="glass-panel animate-fade-in" style={{ maxWidth: "520px", margin: "2rem auto" }}>
+      <h1
+        className="form-title"
+        style={{
+          background: "var(--gradient-neon)",
+          WebkitBackgroundClip: "text",
+          WebkitTextFillColor: "transparent",
+        }}
+      >
+        {config.appName}
+      </h1>
+      <p className="form-subtitle">
+        Sign in with your registered mobile number to continue.
       </p>
-      <form onSubmit={submit} className="space-y-4">
-        <div>
-          <label className="mb-1.5 block text-sm font-medium text-slate-700">
-            Mobile number
-          </label>
-          <PhoneInput value={mobile} onChange={setMobile} required />
+
+      <form onSubmit={submit}>
+        <div className="form-group">
+          <label className="form-label">Mobile number</label>
+          <div className="input-with-icon">
+            <PhoneInput value={mobile} onChange={setMobile} required />
+            <span className="input-icon-left" style={{ top: "50%", transform: "translateY(-50%)" }}>
+              <IconPhone />
+            </span>
+            {isMobileValid && (
+              <span className="input-icon-right-validation">
+                <IconCheck />
+              </span>
+            )}
+          </div>
         </div>
-        {error && (
-          <p className="rounded-lg bg-red-50 px-3 py-2 text-sm text-red-700">{error}</p>
-        )}
-        <Button type="submit" fullWidth disabled={loading}>
+        {error && <p className="text-error" style={{ marginBottom: "1rem" }}>{error}</p>}
+        <button type="submit" className="submit-btn" disabled={loading} style={{ width: "100%" }}>
           {loading ? "Please wait…" : "Continue"}
-        </Button>
+        </button>
       </form>
-      <p className="mt-6 text-center text-sm text-slate-500">
+
+      <p className="text-muted" style={{ marginTop: "1.5rem", textAlign: "center", fontSize: "0.9rem" }}>
         New here?{" "}
-        <Link to="/register" className="font-semibold text-apad-600 hover:text-apad-700">
+        <Link to="/register" className="text-link">
           Create account
         </Link>
       </p>
-    </AuthLayout>
+      <p style={{ marginTop: "1rem", textAlign: "center", borderTop: "1px solid var(--glass-border)", paddingTop: "1rem" }}>
+        <Link to="/admin/login" className="text-link" style={{ fontSize: "0.875rem", fontWeight: 600 }}>
+          Go to Admin Console
+        </Link>
+      </p>
+    </div>
   );
 }
