@@ -54,6 +54,13 @@ class Settings(BaseSettings):
 
     default_phone_region: str = "IN"
 
+    email_enabled: bool = True
+    ses_from_email: str = ""
+    ses_from_name: str = "APAD Portal"
+    aws_region: str = "us-east-1"
+    aws_access_key_id: str = ""
+    aws_secret_access_key: str = ""
+
     @property
     def uses_twilio_verify(self) -> bool:
         return self.sms_provider.lower() == "twilio"

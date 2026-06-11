@@ -15,7 +15,7 @@ export default function AdPreview() {
     saveFlow({ token });
     trackEvent("preview_fetch", { token });
     apiPublic
-      .get<AdWatchPayload>(`/api/ad/watch?token=${encodeURIComponent(token)}`)
+      .get<AdWatchPayload>(`/api/ad/watch?token=${encodeURIComponent(token)}&gate=email`)
       .then((r) => setPayload(r.data))
       .catch(() => setPayload(null));
   }, [token]);
@@ -36,7 +36,7 @@ export default function AdPreview() {
             />
             <p className="text-muted" style={{ marginTop: "1rem" }}>{payload.description}</p>
             <LinkButton
-              to={`/ad-watch?token=${encodeURIComponent(token)}&gate=login`}
+              to={`/ad-watch?token=${encodeURIComponent(token)}&gate=email`}
               fullWidth
               style={{ width: "100%", marginTop: "2rem" }}
             >

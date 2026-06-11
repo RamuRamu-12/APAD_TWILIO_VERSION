@@ -9,6 +9,10 @@ CRAWLER_KEYWORDS = (
     "discordbot",
     "googlebot",
     "bingbot",
+    "googleimageproxy",
+    "yahoo",
+    "outlook",
+    "mail.ru",
 )
 
 

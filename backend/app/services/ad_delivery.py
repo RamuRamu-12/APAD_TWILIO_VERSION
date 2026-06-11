@@ -1,6 +1,7 @@
 from app.models.campaign import Campaign
 from app.models.user import User
 from app.services.ad_context import resolve_context, resolve_context_for_gate
+from app.services.og_metadata import personalize
 
 __all__ = ["resolve_context", "resolve_context_for_gate", "get_watch_payload"]
 
@@ -12,8 +13,8 @@ def get_watch_payload(user: User, campaign: Campaign, gate: str) -> dict:
         "campaign_name": campaign.name,
         "user_mobile": user.mobile,
         "user_name": user.name,
-        "personalized_title": campaign.title_template,
-        "description": campaign.description,
+        "personalized_title": personalize(campaign.title_template, user.name),
+        "description": personalize(campaign.description, user.name),
         "image_url": campaign.image_url,
         "creative_url": campaign.creative_url,
         "creative_type": campaign.creative_type,

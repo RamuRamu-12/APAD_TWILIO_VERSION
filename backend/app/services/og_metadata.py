@@ -13,7 +13,7 @@ def build_og_html(token_row: GeneratedToken, user: User, campaign: Campaign) -> 
     title = personalize(campaign.title_template, user.name)
     description = personalize(campaign.description, user.name)
     image = campaign.image_url
-    url = f"{settings.frontend_base_url}/ad-preview/{token_row.token}"
+    url = f"{settings.backend_base_url.rstrip('/')}/preview/{token_row.token}"
 
     return f"""<!DOCTYPE html>
 <html>

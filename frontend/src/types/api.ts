@@ -15,7 +15,7 @@ export interface AuthResponse {
   user: User;
 }
 
-export type AdGate = "login" | "otp_request";
+export type AdGate = "login" | "otp_request" | "email";
 
 export interface AdWatchPayload {
   gate: AdGate;
@@ -78,4 +78,32 @@ export interface TokenLink {
 export interface AnalyticsRow {
   event_type: string;
   count: number;
+}
+
+export interface UserSearchParams {
+  min_age?: number;
+  max_age?: number;
+  gender?: string;
+  area?: string;
+  q?: string;
+}
+
+export interface SendCampaignEmailRequest {
+  campaign_id: number;
+  user_ids: number[];
+}
+
+export interface SendCampaignEmailResult {
+  user_id: number;
+  email?: string | null;
+  status: string;
+  url?: string | null;
+  message?: string | null;
+}
+
+export interface SendCampaignEmailResponse {
+  sent: number;
+  skipped: number;
+  failed: number;
+  results: SendCampaignEmailResult[];
 }

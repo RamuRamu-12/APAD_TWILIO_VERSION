@@ -1,4 +1,4 @@
-import { FormEvent, useEffect, useState } from "react";
+import { FormEvent, useCallback, useEffect, useState } from "react";
 import PhoneInput from "../../components/ui/PhoneInput";
 import { useToast } from "../../context/ToastContext";
 import { api } from "../../lib/api";
@@ -19,11 +19,13 @@ export default function AdminUsers() {
   const [form, setForm] = useState(emptyForm);
   const [loading, setLoading] = useState(false);
 
-  const load = () => api.get<User[]>("/api/users").then((r) => setUsers(r.data));
+  const loadAll = useCallback(() => {
+    return api.get<User[]>("/api/users").then((r) => setUsers(r.data));
+  }, []);
 
   useEffect(() => {
-    load();
-  }, []);
+    loadAll();
+  }, [loadAll]);
 
   const set = <K extends keyof typeof form>(key: K, value: (typeof form)[K]) => {
     setForm((f) => ({ ...f, [key]: value }));
@@ -42,7 +44,7 @@ export default function AdminUsers() {
         area: form.area,
       });
       setForm(emptyForm);
-      await load();
+      await loadAll();
       showToast("User account created");
     } catch (err: unknown) {
       const msg =
@@ -60,7 +62,7 @@ export default function AdminUsers() {
         <div>
           <h1 style={{ fontSize: "1.75rem", marginBottom: "0.25rem" }}>User accounts</h1>
           <p style={{ color: "var(--text-secondary)", fontSize: "0.9rem" }}>
-            Add people who can receive personalized advertisements.
+            Create and manage user accounts.
           </p>
         </div>
       </div>
@@ -73,12 +75,7 @@ export default function AdminUsers() {
         >
           <div className="form-group">
             <label className="form-label">Full name *</label>
-            <input
-              className="form-input"
-              value={form.name}
-              onChange={(e) => set("name", e.target.value)}
-              required
-            />
+            <input className="form-input" value={form.name} onChange={(e) => set("name", e.target.value)} required />
           </div>
           <div className="form-group">
             <label className="form-label">Mobile *</label>
@@ -118,11 +115,7 @@ export default function AdminUsers() {
           </div>
           <div className="form-group">
             <label className="form-label">City</label>
-            <input
-              className="form-input"
-              value={form.area}
-              onChange={(e) => set("area", e.target.value)}
-            />
+            <input className="form-input" value={form.area} onChange={(e) => set("area", e.target.value)} />
           </div>
           <div style={{ gridColumn: "1 / -1" }}>
             <button type="submit" className="nav-btn active" disabled={loading} style={{ color: "#000" }}>
@@ -154,7 +147,7 @@ export default function AdminUsers() {
                   <tr key={u.id}>
                     <td style={{ fontWeight: 600 }}>{u.name}</td>
                     <td>{u.mobile}</td>
-                    <td>{u.email}</td>
+                    <td>{u.email || "—"}</td>
                     <td>{u.age}</td>
                     <td>{u.gender}</td>
                     <td>{u.area || "—"}</td>

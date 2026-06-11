@@ -7,6 +7,7 @@ export default function AdminLayout() {
   const isRegistry =
     location.pathname === "/admin" || location.pathname === "/admin/campaigns";
   const isUsers = location.pathname.startsWith("/admin/users");
+  const isSendCampaign = location.pathname.startsWith("/admin/send-campaign");
 
   return (
     <div className="page-bg mesh-bg min-h-screen">
@@ -21,6 +22,9 @@ export default function AdminLayout() {
             </Link>
             <Link to="/admin/users" className={`nav-btn ${isUsers ? "active" : ""}`}>
               Users
+            </Link>
+            <Link to="/admin/send-campaign" className={`nav-btn ${isSendCampaign ? "active" : ""}`}>
+              Send Campaign
             </Link>
             <button type="button" className="nav-btn" onClick={() => navigate("/dashboard")}>
               Back to Portal

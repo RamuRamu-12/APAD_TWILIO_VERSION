@@ -6,8 +6,10 @@ from app.dependencies import get_admin_user, get_current_user
 from app.models.campaign import Campaign, TargetingRule
 from app.models.user import User
 from app.schemas.campaign import CampaignCreate, CampaignRecommendation, CampaignResponse
+from app.schemas.campaign_send import SendCampaignEmailRequest, SendCampaignEmailResponse
 from app.services import analytics_engine
 from app.services.audience_matching import get_matching_campaigns, get_matching_users
+from app.services.campaign_email import send_campaign_to_users
 
 router = APIRouter(prefix="/campaigns", tags=["campaigns"])
 
@@ -56,6 +58,15 @@ def list_campaigns(db: Session = Depends(get_db)):
         .order_by(Campaign.priority.desc(), Campaign.id.desc())
         .all()
     )
+
+
+@router.post("/send-email", response_model=SendCampaignEmailResponse)
+def send_campaign_email(
+    data: SendCampaignEmailRequest,
+    db: Session = Depends(get_db),
+    _: User = Depends(get_admin_user),
+):
+    return send_campaign_to_users(db, data.campaign_id, data.user_ids)
 
 
 @router.get("/for-me", response_model=list[CampaignRecommendation])
