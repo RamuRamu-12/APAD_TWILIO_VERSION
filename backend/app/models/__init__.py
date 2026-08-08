@@ -4,6 +4,12 @@ from app.models.generated_token import GeneratedToken
 from app.models.otp_log import OtpLog
 from app.models.analytics_event import AnalyticsEvent
 from app.models.ad_completion import AdCompletion
+from app.models.provenance import (
+    LedgerEntry,
+    MerkleBatch,
+    ProvenanceSource,
+    ProvenanceToken,
+)
 
 __all__ = [
     "User",
@@ -13,4 +19,8 @@ __all__ = [
     "OtpLog",
     "AnalyticsEvent",
     "AdCompletion",
+    "LedgerEntry",
+    "MerkleBatch",
+    "ProvenanceSource",
+    "ProvenanceToken",
 ]

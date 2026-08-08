@@ -1,5 +1,6 @@
 import { Outlet } from "react-router-dom";
 import Navbar from "./Navbar";
+import SiteFooter from "./SiteFooter";
 
 export default function AppShell() {
   return (
@@ -7,6 +8,7 @@ export default function AppShell() {
       <Navbar />
       <main className="app-container" style={{ minHeight: "auto", justifyContent: "flex-start" }}>
         <Outlet />
+        <SiteFooter />
       </main>
     </div>
   );

@@ -10,11 +10,19 @@ class UserRegister(BaseModel):
     age: int = Field(ge=1, le=120)
     gender: str
     area: str
+    sms_consent: bool = False
 
     @field_validator("mobile")
     @classmethod
     def validate_mobile(cls, v: str) -> str:
         return normalize_mobile(v)
+
+    @field_validator("sms_consent")
+    @classmethod
+    def require_sms_consent(cls, v: bool) -> bool:
+        if not v:
+            raise ValueError("SMS consent is required")
+        return v
 
 
 class UserLogin(BaseModel):

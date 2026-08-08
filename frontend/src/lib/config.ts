@@ -4,4 +4,6 @@ export const config = {
   pocMode: import.meta.env.VITE_POC_MODE === "true",
   appName: import.meta.env.VITE_APP_NAME || "APAD Portal",
   tagline: "Personalized offers · Secure sign-in",
+  publicSiteUrl: import.meta.env.VITE_PUBLIC_SITE_URL || "http://localhost:5173",
+  supportEmail: import.meta.env.VITE_SUPPORT_EMAIL || "support@yourcompany.com",
 };

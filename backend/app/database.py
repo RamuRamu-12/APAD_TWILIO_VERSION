@@ -98,6 +98,31 @@ def _ensure_user_email_column() -> None:
         )
 
 
+def _ensure_user_sms_consent_columns() -> None:
+    from sqlalchemy import inspect, text
+
+    insp = inspect(engine)
+    if "users" not in insp.get_table_names():
+        return
+    columns = {col["name"] for col in insp.get_columns("users")}
+    with engine.begin() as conn:
+        if "sms_consent" not in columns:
+            if settings.is_postgres:
+                conn.execute(
+                    text("ALTER TABLE users ADD COLUMN sms_consent BOOLEAN DEFAULT FALSE NOT NULL")
+                )
+            else:
+                conn.execute(
+                    text("ALTER TABLE users ADD COLUMN sms_consent BOOLEAN DEFAULT 0 NOT NULL")
+                )
+        if "sms_consent_at" not in columns:
+            conn.execute(
+                text("ALTER TABLE users ADD COLUMN sms_consent_at TIMESTAMP WITH TIME ZONE")
+                if settings.is_postgres
+                else text("ALTER TABLE users ADD COLUMN sms_consent_at DATETIME")
+            )
+
+
 def _migrate_mobiles_to_e164() -> None:
     from sqlalchemy import inspect, text
 
@@ -149,6 +174,7 @@ def init_db() -> None:
     _ensure_campaign_priority_column()
     _ensure_ad_completion_gate_column()
     _ensure_user_email_column()
+    _ensure_user_sms_consent_columns()
     _migrate_mobiles_to_e164()
 
 

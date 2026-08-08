@@ -10,6 +10,7 @@ from app.schemas.campaign_send import SendCampaignEmailRequest, SendCampaignEmai
 from app.services import analytics_engine
 from app.services.audience_matching import get_matching_campaigns, get_matching_users
 from app.services.campaign_email import send_campaign_to_users
+from app.services.provenance_tokenizer import ensure_campaign_creative_token
 
 router = APIRouter(prefix="/campaigns", tags=["campaigns"])
 
@@ -46,7 +47,15 @@ def create_campaign(
         )
     db.commit()
     db.refresh(campaign)
-    analytics_engine.track_event(db, "campaign_created", metadata={"campaign_id": campaign.id})
+    provenance_token = ensure_campaign_creative_token(db, campaign)
+    analytics_engine.track_event(
+        db,
+        "campaign_created",
+        metadata={
+            "campaign_id": campaign.id,
+            "provenance_token_id": provenance_token.token_id,
+        },
+    )
     return campaign
 
 

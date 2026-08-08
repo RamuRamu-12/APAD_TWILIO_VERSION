@@ -1,5 +1,6 @@
 import { FormEvent, useCallback, useEffect, useState } from "react";
 import PhoneInput from "../../components/ui/PhoneInput";
+import SmsConsentCheckbox from "../../components/legal/SmsConsentCheckbox";
 import { useToast } from "../../context/ToastContext";
 import { api } from "../../lib/api";
 import type { User } from "../../types/api";
@@ -17,6 +18,7 @@ export default function AdminUsers() {
   const { showToast } = useToast();
   const [users, setUsers] = useState<User[]>([]);
   const [form, setForm] = useState(emptyForm);
+  const [smsConsent, setSmsConsent] = useState(false);
   const [loading, setLoading] = useState(false);
 
   const loadAll = useCallback(() => {
@@ -33,6 +35,10 @@ export default function AdminUsers() {
 
   const create = async (e: FormEvent) => {
     e.preventDefault();
+    if (!smsConsent) {
+      showToast("SMS consent is required when creating a user", true);
+      return;
+    }
     setLoading(true);
     try {
       await api.post("/api/users", {
@@ -42,8 +48,10 @@ export default function AdminUsers() {
         age: Number(form.age),
         gender: form.gender,
         area: form.area,
+        sms_consent: true,
       });
       setForm(emptyForm);
+      setSmsConsent(false);
       await loadAll();
       showToast("User account created");
     } catch (err: unknown) {
@@ -116,6 +124,9 @@ export default function AdminUsers() {
           <div className="form-group">
             <label className="form-label">City</label>
             <input className="form-input" value={form.area} onChange={(e) => set("area", e.target.value)} />
+          </div>
+          <div className="form-group" style={{ gridColumn: "1 / -1" }}>
+            <SmsConsentCheckbox id="admin-sms-consent" checked={smsConsent} onChange={setSmsConsent} />
           </div>
           <div style={{ gridColumn: "1 / -1" }}>
             <button type="submit" className="nav-btn active" disabled={loading} style={{ color: "#000" }}>

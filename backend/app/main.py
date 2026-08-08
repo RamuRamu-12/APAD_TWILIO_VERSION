@@ -5,7 +5,7 @@ from fastapi.middleware.cors import CORSMiddleware
 
 from app.config import get_settings
 from app.database import check_db_connection, init_db, SessionLocal
-from app.routers import ads, analytics, auth, campaigns, otp, preview, tokens, users
+from app.routers import ads, analytics, auth, campaigns, otp, preview, provenance, tokens, users
 from app.seed import seed_demo_data
 
 import logging
@@ -55,6 +55,7 @@ app.include_router(tokens.router, prefix=api)
 app.include_router(ads.router, prefix=api)
 app.include_router(otp.router, prefix=api)
 app.include_router(analytics.router, prefix=api)
+app.include_router(provenance.router, prefix=api)
 app.include_router(preview.router)
 
 

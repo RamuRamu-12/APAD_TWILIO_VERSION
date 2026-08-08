@@ -1,6 +1,8 @@
 from fastapi import HTTPException
 from sqlalchemy.orm import Session
 
+from datetime import datetime, timezone
+
 from app.models.user import User
 from app.schemas.user import UserRegister
 from app.utils.jwt import create_access_token
@@ -22,6 +24,8 @@ def register_user(db: Session, data: UserRegister) -> User:
         gender=data.gender,
         area=data.area,
         role="user",
+        sms_consent=True,
+        sms_consent_at=datetime.now(timezone.utc),
     )
     db.add(user)
     db.commit()

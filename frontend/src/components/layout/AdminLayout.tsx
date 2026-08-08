@@ -8,6 +8,7 @@ export default function AdminLayout() {
     location.pathname === "/admin" || location.pathname === "/admin/campaigns";
   const isUsers = location.pathname.startsWith("/admin/users");
   const isSendCampaign = location.pathname.startsWith("/admin/send-campaign");
+  const isBlockchain = location.pathname.startsWith("/admin/blockchain");
 
   return (
     <div className="page-bg mesh-bg min-h-screen">
@@ -25,6 +26,9 @@ export default function AdminLayout() {
             </Link>
             <Link to="/admin/send-campaign" className={`nav-btn ${isSendCampaign ? "active" : ""}`}>
               Send Campaign
+            </Link>
+            <Link to="/admin/blockchain" className={`nav-btn ${isBlockchain ? "active" : ""}`}>
+              Blockchain Audit
             </Link>
             <button type="button" className="nav-btn" onClick={() => navigate("/dashboard")}>
               Back to Portal

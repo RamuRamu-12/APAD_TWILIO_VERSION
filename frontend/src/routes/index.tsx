@@ -6,6 +6,8 @@ import ProtectedRoute from "./ProtectedRoute";
 import Home from "../pages/public/Home";
 import Register from "../pages/public/Register";
 import Login from "../pages/public/Login";
+import PrivacyPolicy from "../pages/public/PrivacyPolicy";
+import TermsOfService from "../pages/public/TermsOfService";
 import GetOtp from "../pages/public/GetOtp";
 import AdWatch from "../pages/ads/AdWatch";
 import AdPreview from "../pages/ads/AdPreview";
@@ -20,6 +22,7 @@ import AdminLogin from "../pages/admin/AdminLogin";
 import AdminControlCenter from "../pages/admin/AdminControlCenter";
 import AdminUsers from "../pages/admin/AdminUsers";
 import AdminSendCampaign from "../pages/admin/AdminSendCampaign";
+import AdminBlockchainAudit from "../pages/admin/AdminBlockchainAudit";
 
 export default function AppRoutes() {
   return (
@@ -28,6 +31,8 @@ export default function AppRoutes() {
         <Route path="/" element={<Home />} />
         <Route path="/register" element={<Register />} />
         <Route path="/login" element={<Login />} />
+        <Route path="/privacy-policy" element={<PrivacyPolicy />} />
+        <Route path="/terms-of-service" element={<TermsOfService />} />
         <Route path="/admin/login" element={<AdminLogin />} />
         <Route path="/get-otp" element={<GetOtp />} />
         <Route path="/ad-watch" element={<AdWatch />} />
@@ -81,6 +86,7 @@ export default function AppRoutes() {
         <Route path="/admin/campaigns" element={<AdminControlCenter />} />
         <Route path="/admin/users" element={<AdminUsers />} />
         <Route path="/admin/send-campaign" element={<AdminSendCampaign />} />
+        <Route path="/admin/blockchain" element={<AdminBlockchainAudit />} />
         <Route path="/admin/analytics" element={<Navigate to="/admin#analytics" replace />} />
       </Route>
     </Routes>

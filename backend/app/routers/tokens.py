@@ -23,7 +23,12 @@ def generate_token(
         match_audience=data.match_audience,
     )
     for link in links:
-        analytics_engine.track_event(db, "token_generated", token=link["token"])
+        analytics_engine.track_event(
+            db,
+            "token_generated",
+            token=link["token"],
+            metadata={"provenance_token_id": link.get("provenance_token_id")},
+        )
     return GenerateTokenResponse(
         links=[TokenLinkResponse(**link) for link in links]
     )

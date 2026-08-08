@@ -6,7 +6,9 @@ from app.services.og_metadata import personalize
 __all__ = ["resolve_context", "resolve_context_for_gate", "get_watch_payload"]
 
 
-def get_watch_payload(user: User, campaign: Campaign, gate: str) -> dict:
+def get_watch_payload(
+    user: User, campaign: Campaign, gate: str, provenance_token_id: str | None = None
+) -> dict:
     return {
         "gate": gate,
         "campaign_id": campaign.id,
@@ -19,4 +21,5 @@ def get_watch_payload(user: User, campaign: Campaign, gate: str) -> dict:
         "creative_url": campaign.creative_url,
         "creative_type": campaign.creative_type,
         "min_watch_seconds": campaign.min_watch_seconds,
+        "provenance_token_id": provenance_token_id,
     }

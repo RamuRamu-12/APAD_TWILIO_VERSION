@@ -1,6 +1,7 @@
 import { FormEvent, useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import PhoneInput from "../../components/ui/PhoneInput";
+import SmsConsentCheckbox from "../../components/legal/SmsConsentCheckbox";
 import {
   IconArrowRight,
   IconCalendar,
@@ -35,6 +36,7 @@ export default function Register() {
     area: LOCATION_OPTIONS[0],
   });
   const [selectedPrefs, setSelectedPrefs] = useState<string[]>([]);
+  const [smsConsent, setSmsConsent] = useState(false);
   const [loading, setLoading] = useState(false);
 
   const isNameValid = form.name.trim().length >= 2;
@@ -44,7 +46,7 @@ export default function Register() {
     const n = parseInt(form.age, 10);
     return !isNaN(n) && n >= 1 && n <= 120;
   };
-  const step1Valid = isNameValid && isEmailValid && isMobileValid && isAgeValid();
+  const step1Valid = isNameValid && isEmailValid && isMobileValid && isAgeValid() && smsConsent;
 
   const handleNextStep = () => {
     if (!isNameValid) {
@@ -61,6 +63,10 @@ export default function Register() {
     }
     if (!isAgeValid()) {
       showToast("Please enter a valid age (between 1 and 120)", true);
+      return;
+    }
+    if (!smsConsent) {
+      showToast("Please agree to receive SMS messages to continue", true);
       return;
     }
     setStep(2);
@@ -89,6 +95,7 @@ export default function Register() {
         age: Number(form.age),
         gender: form.gender,
         area: form.area,
+        sms_consent: true,
       });
       showToast("Registration successful! Please sign in.", false);
       navigate("/login", { state: { mobile: form.mobile } });
@@ -223,6 +230,10 @@ export default function Register() {
                   </span>
                 )}
               </div>
+            </div>
+
+            <div className="form-group" style={{ marginTop: "0.25rem" }}>
+              <SmsConsentCheckbox checked={smsConsent} onChange={setSmsConsent} />
             </div>
 
             <div style={{ display: "grid", gridTemplateColumns: "1fr 1.2fr", gap: "1rem" }}>

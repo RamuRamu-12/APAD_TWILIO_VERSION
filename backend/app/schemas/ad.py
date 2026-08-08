@@ -15,6 +15,7 @@ class AdWatchResponse(BaseModel):
     creative_url: str
     creative_type: str
     min_watch_seconds: int
+    provenance_token_id: str | None = None
 
 
 class AdCompletedRequest(BaseModel):

@@ -11,6 +11,7 @@ from app.schemas.ad import (
 from app.services import ad_delivery, ad_completion_tracker, analytics_engine
 from app.services.ad_context import resolve_context_for_gate
 from app.services.ad_gates import GATE_LOGIN, GATE_OTP_REQUEST, VALID_GATES
+from app.services.provenance_tokenizer import ensure_campaign_creative_token
 
 router = APIRouter(prefix="/ad", tags=["ads"])
 
@@ -35,10 +36,17 @@ def watch_ad(
     if gate not in VALID_GATES:
         raise HTTPException(status_code=400, detail="Invalid ad gate")
     user, campaign, token_val = resolve_context_for_gate(db, token, mobile, gate)
+    provenance_token = ensure_campaign_creative_token(db, campaign)
     analytics_engine.track_event(
-        db, "ad_impression", user_id=user.id, token=token_val, metadata={"gate": gate}
+        db,
+        "ad_impression",
+        user_id=user.id,
+        token=token_val,
+        metadata={"gate": gate, "provenance_token_id": provenance_token.token_id},
     )
-    return ad_delivery.get_watch_payload(user, campaign, gate)
+    return ad_delivery.get_watch_payload(
+        user, campaign, gate, provenance_token.token_id
+    )
 
 
 @router.post("/completed", response_model=AdCompletedResponse)
@@ -46,12 +54,17 @@ def ad_completed(data: AdCompletedRequest, db: Session = Depends(get_db)):
     ad_completion_tracker.record_completion(
         db, data.mobile, data.token, data.watch_duration, data.gate
     )
-    user, _, token_val = resolve_context_for_gate(
+    user, campaign, token_val = resolve_context_for_gate(
         db, data.token, data.mobile, GATE_LOGIN
     )
     status = ad_completion_tracker.get_flow_status(db, user.id, token_val)
+    provenance_token = ensure_campaign_creative_token(db, campaign)
     analytics_engine.track_event(
-        db, "ad_completed", user_id=user.id, token=token_val, metadata={"gate": data.gate}
+        db,
+        "ad_completed",
+        user_id=user.id,
+        token=token_val,
+        metadata={"gate": data.gate, "provenance_token_id": provenance_token.token_id},
     )
     return AdCompletedResponse(
         gate=data.gate,

@@ -29,6 +29,7 @@ export interface AdWatchPayload {
   creative_url: string;
   creative_type: string;
   min_watch_seconds: number;
+  provenance_token_id?: string | null;
 }
 
 export interface SendOtpResponse {
@@ -73,6 +74,7 @@ export interface TokenLink {
   user_id: number;
   user_name: string;
   url: string;
+  provenance_token_id?: string | null;
 }
 
 export interface AnalyticsRow {
@@ -106,4 +108,54 @@ export interface SendCampaignEmailResponse {
   skipped: number;
   failed: number;
   results: SendCampaignEmailResult[];
+}
+
+export interface ProvenanceToken {
+  token_id: string;
+  content_hash: string;
+  parent_token_id?: string | null;
+  source_id: string;
+  stage: string;
+  asset_ref?: string | null;
+  related_entity_type?: string | null;
+  related_entity_id?: number | null;
+  transform_meta: Record<string, unknown>;
+  sig_classical?: string | null;
+  sig_pqc?: string | null;
+  ledger_anchor?: string | null;
+  schema_version: string;
+  created_at: string;
+}
+
+export interface CampaignProvenance {
+  campaign_id: number;
+  campaign_name: string;
+  creative_url: string;
+  image_url: string;
+  provenance_token?: ProvenanceToken | null;
+}
+
+export interface ProvenanceVerifyResult {
+  token_id: string;
+  valid: boolean;
+  errors: string[];
+  content_hash: string;
+  ledger_anchor?: string | null;
+  ledger_position?: number | null;
+}
+
+export interface ProvenanceLineage {
+  token_id: string;
+  lineage: ProvenanceToken[];
+}
+
+export interface MerkleBatch {
+  batch_id: string;
+  merkle_root: string;
+  entry_count: number;
+  anchor_status: string;
+  anchor_provider?: string | null;
+  anchor_tx_id?: string | null;
+  anchored_at?: string | null;
+  created_at: string;
 }

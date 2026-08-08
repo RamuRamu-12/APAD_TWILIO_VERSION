@@ -12,6 +12,7 @@ class TokenLinkResponse(BaseModel):
     user_id: int
     user_name: str
     url: str
+    provenance_token_id: str | None = None
 
 
 class GenerateTokenResponse(BaseModel):
