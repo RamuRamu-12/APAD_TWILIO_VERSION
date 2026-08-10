@@ -17,7 +17,7 @@ export default function Profile() {
 
   return (
     <div className="animate-fade-in">
-      <PageHeader title="Profile" description="Your APAD account details." />
+      <PageHeader title="Profile" description="Your Mastercard Portal account details." />
       <div className="glass-panel user-profile-panel" style={{ maxWidth: "480px" }}>
         <div className="profile-avatar">{user.name.charAt(0).toUpperCase()}</div>
         <h2 style={{ textAlign: "center", marginBottom: "1rem" }}>{user.name}</h2>

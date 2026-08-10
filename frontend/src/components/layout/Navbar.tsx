@@ -12,8 +12,9 @@ export default function Navbar() {
     <header className="glass-nav sticky top-0 z-50">
       <div className="app-container" style={{ minHeight: "auto", paddingTop: "1rem", paddingBottom: "1rem" }}>
         <div className="header-nav" style={{ marginBottom: 0, paddingBottom: 0, borderBottom: "none" }}>
-          <Link to="/" className="logo">
-            {config.appName}
+          <Link to="/" className="mc-brand-row" style={{ textDecoration: "none", gap: "0.55rem" }}>
+            <span className="mc-circles" aria-hidden="true" />
+            <span className="logo" style={{ margin: 0 }}>{config.appName}</span>
           </Link>
 
           <nav className="nav-links">

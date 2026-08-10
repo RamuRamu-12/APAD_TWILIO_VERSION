@@ -1,14 +1,13 @@
 import { FormEvent, useCallback, useEffect, useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import OtpInput from "../../components/otp/OtpInput";
-import AdCard from "../../components/ads/AdCard";
 import { useAuth } from "../../context/AuthContext";
 import { useToast } from "../../context/ToastContext";
-import { config } from "../../lib/config";
 import { apiPublic } from "../../lib/api";
+import { config } from "../../lib/config";
 import { getFlow, clearFlow, saveFlow } from "../../lib/auth";
 import { trackEvent } from "../../lib/analytics";
-import type { AuthResponse, SendOtpResponse, Campaign } from "../../types/api";
+import type { AuthResponse, SendOtpResponse } from "../../types/api";
 
 const RESEND_COOLDOWN_SEC = 60;
 
@@ -23,21 +22,6 @@ export default function OtpVerification() {
   const [checking, setChecking] = useState(true);
   const [resendCooldown, setResendCooldown] = useState(0);
   const [resending, setResending] = useState(false);
-  const [campaigns, setCampaigns] = useState<Campaign[]>([]);
-  const [adsLoading, setAdsLoading] = useState(true);
-
-  const loadAds = () => {
-    setAdsLoading(true);
-    apiPublic
-      .get<Campaign[]>("/api/campaigns")
-      .then((r) => setCampaigns(r.data.slice(0, 2)))
-      .catch(() => setCampaigns([]))
-      .finally(() => setAdsLoading(false));
-  };
-
-  useEffect(() => {
-    loadAds();
-  }, []);
 
   useEffect(() => {
     if (resendCooldown <= 0) return;
@@ -62,11 +46,14 @@ export default function OtpVerification() {
         const q = flow.token
           ? `token=${encodeURIComponent(flow.token)}`
           : `mobile=${encodeURIComponent(flow.mobile!)}`;
-        const { data } = await apiPublic.get<{ otp_ad_completed: boolean }>(
+        const { data } = await apiPublic.get<{ login_ad_completed: boolean }>(
           `/api/ad/status?${q}`
         );
-        if (!data.otp_ad_completed) {
-          navigate("/generate-otp", { replace: true });
+        if (!data.login_ad_completed) {
+          const adQ = flow.token
+            ? `token=${encodeURIComponent(flow.token)}&gate=login`
+            : `mobile=${encodeURIComponent(flow.mobile!)}&gate=login`;
+          navigate(`/ad-watch?${adQ}`, { replace: true });
           return;
         }
       } catch {
@@ -76,14 +63,6 @@ export default function OtpVerification() {
     };
     guard();
   }, []);
-
-  const replayAds = () => {
-    if (!flow.mobile && !flow.token) return;
-    const q = flow.token
-      ? `token=${encodeURIComponent(flow.token)}&gate=otp_request`
-      : `mobile=${encodeURIComponent(flow.mobile!)}&gate=otp_request`;
-    navigate(`/ad-watch?${q}`);
-  };
 
   const resendOtp = useCallback(async () => {
     if (!flow.mobile || resendCooldown > 0 || resending) return;
@@ -148,7 +127,7 @@ export default function OtpVerification() {
             width: "2.5rem",
             height: "2.5rem",
             border: "4px solid var(--glass-border)",
-            borderTopColor: "var(--accent-cyan)",
+            borderTopColor: "var(--mc-red)",
             borderRadius: "50%",
             animation: "spin 1s linear infinite",
           }}
@@ -159,7 +138,7 @@ export default function OtpVerification() {
 
   if (error && !flow.mobile) {
     return (
-      <div className="glass-panel" style={{ maxWidth: "520px", margin: "2rem auto" }}>
+      <div className="mc-panel" style={{ maxWidth: "520px", margin: "2rem auto" }}>
         <h1 className="form-title">Security Verification</h1>
         <p className="text-error" style={{ textAlign: "center" }}>{error}</p>
         <Link to="/login" className="text-link" style={{ display: "block", textAlign: "center", marginTop: "1rem" }}>
@@ -172,36 +151,22 @@ export default function OtpVerification() {
   const contact = flow.maskedMobile || flow.mobile || "your number";
 
   return (
-    <div className="verify-split-container animate-fade-in" style={{ width: "100%" }}>
-      <div className="glass-panel" style={{ alignSelf: "start" }}>
-        <button
-          type="button"
-          onClick={replayAds}
-          style={{
-            background: "none",
-            border: "none",
-            color: "var(--text-secondary)",
-            cursor: "pointer",
-            display: "flex",
-            alignItems: "center",
-            gap: "0.25rem",
-            marginBottom: "1.5rem",
-            fontSize: "0.9rem",
-            fontFamily: "inherit",
-          }}
-        >
-          ← Replay Advertisements
-        </button>
+    <div className="mc-otp-wrap animate-fade-in">
+      <div className="mc-panel" style={{ maxWidth: "28rem", width: "100%", margin: "0 auto" }}>
+        <div className="mc-brand-row">
+          <span className="mc-circles" aria-hidden="true" />
+          <span className="mc-brand-name">{config.appName}</span>
+        </div>
 
         <h1 className="form-title" style={{ fontSize: "1.75rem" }}>
-          Security Verification
+          Enter your OTP
         </h1>
         <p className="form-subtitle">
-          We have generated your verification code for <strong>{contact}</strong>
+          We sent a one-time password to <strong>{contact}</strong>
         </p>
 
         {config.pocMode && flow.otpForScreen ? (
-          <div className="otp-callout">
+          <div className="otp-callout mc-otp-callout">
             <div>
               <div style={{ fontSize: "0.85rem", color: "var(--text-secondary)" }}>
                 SMS delivery preview (staging only)
@@ -223,11 +188,11 @@ export default function OtpVerification() {
           {error && <p className="text-error" style={{ textAlign: "center", marginTop: "1rem" }}>{error}</p>}
           <button
             type="submit"
-            className="submit-btn"
+            className="submit-btn mc-btn"
             disabled={loading || otp.length < 6}
             style={{ width: "100%", marginTop: "1.5rem" }}
           >
-            {loading ? "Verifying..." : "Verify & Sign In"}
+            {loading ? "Verifying..." : "Verify & continue"}
           </button>
         </form>
 
@@ -240,7 +205,7 @@ export default function OtpVerification() {
             style={{
               background: "none",
               border: "none",
-              color: resendCooldown > 0 ? "var(--text-muted)" : "var(--accent-cyan)",
+              color: resendCooldown > 0 ? "var(--text-muted)" : "var(--mc-orange)",
               cursor: resendCooldown > 0 ? "not-allowed" : "pointer",
               fontWeight: 600,
               fontFamily: "inherit",
@@ -249,25 +214,6 @@ export default function OtpVerification() {
             {resendCooldown > 0 ? `Resend OTP in ${resendCooldown}s` : "Resend OTP"}
           </button>
         </div>
-      </div>
-
-      <div className="ads-section">
-        <h2 className="ads-title-header">While you verify</h2>
-        {adsLoading ? (
-          <p className="text-muted" style={{ textAlign: "center", padding: "3rem" }}>
-            Loading ads...
-          </p>
-        ) : campaigns.length === 0 ? (
-          <div className="glass-panel" style={{ textAlign: "center", padding: "3rem" }}>
-            <p className="text-muted">No advertisements matched.</p>
-          </div>
-        ) : (
-          <div className="ads-grid" style={{ gridTemplateColumns: "1fr", gap: "1.5rem" }}>
-            {campaigns.map((c) => (
-              <AdCard key={c.id} campaign={c} />
-            ))}
-          </div>
-        )}
       </div>
     </div>
   );

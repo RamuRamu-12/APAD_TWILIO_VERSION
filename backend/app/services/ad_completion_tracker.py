@@ -27,9 +27,11 @@ def has_valid_completion(
 
 
 def get_flow_status(db: Session, user_id: int, token: str | None) -> dict:
+    # Single-ad Mastercard flow: login gate is enough to request OTP.
+    login_done = has_valid_completion(db, user_id, token, GATE_LOGIN)
     return {
-        "login_ad_completed": has_valid_completion(db, user_id, token, GATE_LOGIN),
-        "otp_ad_completed": has_valid_completion(db, user_id, token, GATE_OTP_REQUEST),
+        "login_ad_completed": login_done,
+        "otp_ad_completed": login_done,
     }
 
 

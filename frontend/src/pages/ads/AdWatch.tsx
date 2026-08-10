@@ -4,6 +4,7 @@ import AdPlayer from "../../components/ads/AdPlayer";
 import { apiPublic } from "../../lib/api";
 import { getFlow, saveFlow } from "../../lib/auth";
 import { trackEvent } from "../../lib/analytics";
+import { config } from "../../lib/config";
 import type { AdGate, AdWatchPayload, SendOtpResponse } from "../../types/api";
 
 function parseGate(value: string | null): AdGate {
@@ -73,11 +74,7 @@ export default function AdWatch() {
         return;
       }
 
-      if (gate === "login") {
-        navigate("/generate-otp");
-        return;
-      }
-
+      // login (and legacy otp_request): one ad → send OTP → verification
       const otpRes = await apiPublic.post<SendOtpResponse>("/api/otp/send-otp", {
         mobile: resolvedMobile,
         token: token || undefined,
@@ -128,11 +125,11 @@ export default function AdWatch() {
   const minSec = payload.min_watch_seconds;
   const secondsLeft = Math.max(minSec - Math.floor(playbackTime), 0);
   const progressPct = Math.min((playbackTime / minSec) * 100, 100);
-  const backTo = gate === "login" ? "/register" : "/generate-otp";
-  const backLabel = gate === "login" ? "Back to Register" : "Back";
+  const backTo = "/login";
+  const backLabel = "Back to sign in";
 
   return (
-    <div className="glass-panel animate-fade-in" style={{ maxWidth: "600px", margin: "2rem auto" }}>
+    <div className="mc-panel animate-fade-in" style={{ maxWidth: "600px", margin: "2rem auto" }}>
       {!isEmailCampaign && (
         <Link
           to={backTo}
@@ -152,13 +149,18 @@ export default function AdWatch() {
         </Link>
       )}
 
+      <div className="mc-brand-row" style={{ marginBottom: "1.25rem" }}>
+        <span className="mc-circles" aria-hidden="true" />
+        <span className="mc-brand-name">{config.appName}</span>
+      </div>
+
       <div style={{ marginBottom: "2rem", borderBottom: "1px solid var(--glass-border)", paddingBottom: "1.5rem" }}>
         <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "0.75rem", flexWrap: "wrap", gap: "0.5rem" }}>
           <span
             className="enforced-ad-status"
             style={{ display: "flex", alignItems: "center", gap: "0.5rem", fontSize: "1rem", textTransform: "uppercase" }}
           >
-            <span className="preview-dot" style={{ backgroundColor: "var(--accent-rose)", width: 8, height: 8 }} />
+            <span className="preview-dot" style={{ backgroundColor: "var(--mc-red)", width: 8, height: 8 }} />
             {isEmailCampaign ? "Your offer" : "Sponsored message"}
           </span>
           <span className="text-muted" style={{ fontSize: "0.95rem" }}>
@@ -173,7 +175,7 @@ export default function AdWatch() {
       <AdPlayer payload={payload} onComplete={onComplete} onProgress={setPlaybackTime} />
       {completing && (
         <p className="text-muted" style={{ marginTop: "1rem", textAlign: "center", fontSize: "0.9rem" }}>
-          Please wait…
+          Sending your verification code…
         </p>
       )}
     </div>

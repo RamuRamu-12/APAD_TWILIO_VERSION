@@ -51,19 +51,14 @@ export default function Login() {
   };
 
   return (
-    <div className="glass-panel animate-fade-in" style={{ maxWidth: "520px", margin: "2rem auto" }}>
-      <h1
-        className="form-title"
-        style={{
-          background: "var(--gradient-neon)",
-          WebkitBackgroundClip: "text",
-          WebkitTextFillColor: "transparent",
-        }}
-      >
-        {config.appName}
-      </h1>
+    <div className="mc-panel animate-fade-in" style={{ maxWidth: "520px", margin: "2rem auto" }}>
+      <div className="mc-brand-row" style={{ justifyContent: "center", marginBottom: "1.25rem" }}>
+        <span className="mc-circles" aria-hidden="true" />
+        <span className="mc-brand-name">{config.appName}</span>
+      </div>
+      <h1 className="form-title">Sign in</h1>
       <p className="form-subtitle">
-        Sign in with your registered mobile number to continue.
+        Enter your registered mobile number to continue to your bank dashboard.
       </p>
 
       <form onSubmit={submit}>
@@ -82,7 +77,7 @@ export default function Login() {
           </div>
         </div>
         {error && <p className="text-error" style={{ marginBottom: "1rem" }}>{error}</p>}
-        <button type="submit" className="submit-btn" disabled={loading} style={{ width: "100%" }}>
+        <button type="submit" className="submit-btn mc-btn" disabled={loading} style={{ width: "100%" }}>
           {loading ? "Please wait…" : "Continue"}
         </button>
       </form>

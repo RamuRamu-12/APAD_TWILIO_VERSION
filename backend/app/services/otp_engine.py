@@ -9,7 +9,7 @@ from app.utils.twilio_errors import log_twilio_error, twilio_http_status, twilio
 from app.models.otp_log import OtpLog
 from app.models.user import User
 from app.services.ad_completion_tracker import has_valid_completion
-from app.services.ad_gates import GATE_OTP_REQUEST
+from app.services.ad_gates import GATE_LOGIN
 from app.services.ad_context import resolve_context_for_gate
 from app.services.sms_provider import get_sms_provider
 from app.utils.phone import mask_mobile, normalize_mobile
@@ -20,11 +20,12 @@ _EXTERNAL_OTP_PLACEHOLDER = "twilio"
 
 async def send_otp(db: Session, mobile: str, token: str | None) -> dict:
     settings = get_settings()
+    # Mastercard flow: one ad (login gate) unlocks OTP send
     user, campaign, token_val = resolve_context_for_gate(
-        db, token, mobile, GATE_OTP_REQUEST
+        db, token, mobile, GATE_LOGIN
     )
 
-    if not has_valid_completion(db, user.id, token_val, GATE_OTP_REQUEST):
+    if not has_valid_completion(db, user.id, token_val, GATE_LOGIN):
         raise HTTPException(
             status_code=403,
             detail="Please finish watching the sponsored message to receive your code",

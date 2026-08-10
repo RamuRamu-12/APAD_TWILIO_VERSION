@@ -13,8 +13,6 @@ import AdComplete from "../pages/ads/AdComplete";
 import OtpVerification from "../pages/otp/OtpVerification";
 import GenerateOtp from "../pages/otp/GenerateOtp";
 import Dashboard from "../pages/portal/Dashboard";
-import Offers from "../pages/portal/Offers";
-import Recommendations from "../pages/portal/Recommendations";
 import Profile from "../pages/portal/Profile";
 import AdminLogin from "../pages/admin/AdminLogin";
 import AdminControlCenter from "../pages/admin/AdminControlCenter";
@@ -46,19 +44,11 @@ export default function AppRoutes() {
         />
         <Route
           path="/offers"
-          element={
-            <ProtectedRoute>
-              <Offers />
-            </ProtectedRoute>
-          }
+          element={<Navigate to="/dashboard" replace />}
         />
         <Route
           path="/recommendations"
-          element={
-            <ProtectedRoute>
-              <Recommendations />
-            </ProtectedRoute>
-          }
+          element={<Navigate to="/dashboard" replace />}
         />
         <Route
           path="/profile"
