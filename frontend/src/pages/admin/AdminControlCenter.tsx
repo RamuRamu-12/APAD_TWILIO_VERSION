@@ -1,7 +1,7 @@
 import { FormEvent, useEffect, useMemo, useState } from "react";
 import { useToast } from "../../context/ToastContext";
 import { api } from "../../lib/api";
-import type { AnalyticsRow, Campaign, User } from "../../types/api";
+import type { AnalyticsRow, Campaign, CampaignCreateResponse, User } from "../../types/api";
 
 const PAGE_SIZE = 5;
 
@@ -130,7 +130,7 @@ export default function AdminControlCenter() {
     }
     setSaving(true);
     try {
-      await api.post("/api/campaigns/create", {
+      const { data } = await api.post<CampaignCreateResponse>("/api/campaigns/create", {
         name: form.name,
         title_template: form.title_template,
         description: form.description,
@@ -149,7 +149,12 @@ export default function AdminControlCenter() {
           },
         ],
       });
-      showToast("Advertisement created successfully");
+      const sent = data.email_send?.sent;
+      showToast(
+        sent == null
+          ? "Advertisement created successfully"
+          : `Advertisement created. Emailed ${sent} opted-in user(s).`
+      );
       setShowModal(false);
       await load();
       setPage(1);

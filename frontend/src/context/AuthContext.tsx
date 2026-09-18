@@ -7,7 +7,7 @@ import {
   type ReactNode,
 } from "react";
 import type { User } from "../types/api";
-import { getUser, logout as clearAuth, saveAuth } from "../lib/auth";
+import { getToken, getUser, logout as clearAuth, saveAuth } from "../lib/auth";
 
 interface AuthContextValue {
   user: User | null;
@@ -16,6 +16,7 @@ interface AuthContextValue {
   login: (token: string, user: User) => void;
   logout: () => void;
   refresh: () => void;
+  updateUser: (user: User) => void;
 }
 
 const AuthContext = createContext<AuthContextValue | null>(null);
@@ -37,6 +38,14 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     setUser(getUser());
   }, []);
 
+  const updateUser = useCallback((nextUser: User) => {
+    const token = getToken();
+    if (token) {
+      saveAuth(token, nextUser);
+    }
+    setUser(nextUser);
+  }, []);
+
   const value = useMemo(
     () => ({
       user,
@@ -45,8 +54,9 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       login,
       logout,
       refresh,
+      updateUser,
     }),
-    [user, login, logout, refresh]
+    [user, login, logout, refresh, updateUser]
   );
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;

@@ -36,6 +36,7 @@ def build_campaign_email(
     image_url: str,
     preview_url: str,
     app_name: str,
+    unsubscribe_url: str | None = None,
 ) -> tuple[str, str, str]:
     title = personalize(title_template, user_name)
     body = personalize(description, user_name)
@@ -47,6 +48,17 @@ def build_campaign_email(
 
     subject = f"{title} — exclusive offer for you"
 
+    unsub_text = ""
+    unsub_html = ""
+    if unsubscribe_url:
+        safe_unsub = _escape_html(unsubscribe_url)
+        unsub_text = f"\nTo stop receiving campaign emails, unsubscribe: {unsubscribe_url}\n"
+        unsub_html = f"""
+        <p style="margin:16px 0 0;font-size:11px;color:#9ca3af;line-height:1.5;">
+          You received this because you opted in to campaign emails.
+          <a href="{safe_unsub}" style="color:#6b7280;">Unsubscribe</a>
+        </p>"""
+
     text = f"""Hi {user_name},
 
 {title}
@@ -54,7 +66,7 @@ def build_campaign_email(
 {body}
 
 View your offer: {preview_url}
-
+{unsub_text}
 — {app_name}
 """
 
@@ -84,6 +96,7 @@ View your offer: {preview_url}
           If the button does not work, copy this link into your browser:<br />
           <a href="{preview_url}" style="color:#3b82f6;word-break:break-all;">{safe_url}</a>
         </p>
+        {unsub_html}
         <p style="margin:16px 0 0;font-size:11px;color:#9ca3af;">{app_name}</p>
       </td>
     </tr>

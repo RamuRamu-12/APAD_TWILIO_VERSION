@@ -7,6 +7,7 @@ export interface User {
   gender: string;
   area: string;
   role: string;
+  marketing_opt_in?: boolean;
 }
 
 export interface AuthResponse {
@@ -86,6 +87,7 @@ export interface UserSearchParams {
   gender?: string;
   area?: string;
   q?: string;
+  marketing_opt_in?: boolean;
 }
 
 export interface SendCampaignEmailRequest {
@@ -106,4 +108,8 @@ export interface SendCampaignEmailResponse {
   skipped: number;
   failed: number;
   results: SendCampaignEmailResult[];
+}
+
+export interface CampaignCreateResponse extends Campaign {
+  email_send?: SendCampaignEmailResponse | null;
 }

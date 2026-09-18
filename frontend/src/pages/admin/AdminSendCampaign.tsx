@@ -10,6 +10,7 @@ const emptyFilters = {
   gender: "any",
   area: "",
   q: "",
+  marketing_opt_in: "any",
 };
 
 function hasValidEmail(email: string) {
@@ -40,6 +41,8 @@ export default function AdminSendCampaign() {
     if (filters.gender && filters.gender !== "any") p.gender = filters.gender;
     if (filters.area.trim()) p.area = filters.area.trim();
     if (filters.q.trim()) p.q = filters.q.trim();
+    if (filters.marketing_opt_in === "true") p.marketing_opt_in = true;
+    if (filters.marketing_opt_in === "false") p.marketing_opt_in = false;
     return p;
   };
 
@@ -70,7 +73,10 @@ export default function AdminSendCampaign() {
     });
   };
 
-  const selectableUsers = useMemo(() => users.filter((u) => hasValidEmail(u.email)), [users]);
+  const selectableUsers = useMemo(
+    () => users.filter((u) => hasValidEmail(u.email) && !!u.marketing_opt_in),
+    [users]
+  );
 
   const selectAllFiltered = () => {
     setSelected(new Set(selectableUsers.map((u) => u.id)));
@@ -113,7 +119,7 @@ export default function AdminSendCampaign() {
         <div>
           <h1 style={{ fontSize: "1.75rem", marginBottom: "0.25rem" }}>Send campaign</h1>
           <p style={{ color: "var(--text-secondary)", fontSize: "0.9rem" }}>
-            Filter users, select recipients, and send campaign offers by email.
+          Filter users, select opted-in recipients, and send campaign offers by email.
           </p>
         </div>
         <button
@@ -179,6 +185,18 @@ export default function AdminSendCampaign() {
               onChange={(e) => setFilters((f) => ({ ...f, area: e.target.value }))}
             />
           </div>
+          <div className="form-group">
+            <label className="form-label">Campaign emails</label>
+            <select
+              className="form-input form-select"
+              value={filters.marketing_opt_in}
+              onChange={(e) => setFilters((f) => ({ ...f, marketing_opt_in: e.target.value }))}
+            >
+              <option value="any">Any</option>
+              <option value="true">Opted in</option>
+              <option value="false">Opted out</option>
+            </select>
+          </div>
           <div className="form-group" style={{ gridColumn: "span 2" }}>
             <label className="form-label">Search name, email, mobile</label>
             <input
@@ -199,7 +217,11 @@ export default function AdminSendCampaign() {
         <p style={{ marginTop: "1rem", fontSize: "0.85rem", color: "var(--text-secondary)" }}>
           {selectedIds.length} selected · {users.length} shown
           {selectableUsers.length < users.length && (
-            <span> · {users.length - selectableUsers.length} without valid email (cannot select)</span>
+            <span>
+              {" "}
+              · {users.length - selectableUsers.length} cannot be selected (no valid email or opted
+              out)
+            </span>
           )}
         </p>
         <div style={{ display: "flex", gap: "0.5rem", marginTop: "0.5rem", flexWrap: "wrap" }}>
@@ -255,11 +277,17 @@ export default function AdminSendCampaign() {
                   <th>Age</th>
                   <th>Gender</th>
                   <th>City</th>
+                  <th>Emails</th>
                 </tr>
               </thead>
               <tbody>
                 {users.map((u) => {
-                  const canSelect = hasValidEmail(u.email);
+                  const canSelect = hasValidEmail(u.email) && !!u.marketing_opt_in;
+                  const blockReason = !hasValidEmail(u.email)
+                    ? "No valid email"
+                    : !u.marketing_opt_in
+                      ? "User has not opted in"
+                      : "Select user";
                   return (
                     <tr key={u.id}>
                       <td>
@@ -268,16 +296,23 @@ export default function AdminSendCampaign() {
                           checked={selected.has(u.id)}
                           disabled={!canSelect}
                           onChange={() => toggleUser(u.id)}
-                          title={canSelect ? "Select user" : "No valid email"}
+                          title={blockReason}
                           aria-label={`Select ${u.name}`}
                         />
                       </td>
                       <td style={{ fontWeight: 600 }}>{u.name}</td>
                       <td>{u.mobile}</td>
-                      <td style={{ color: canSelect ? undefined : "var(--accent-rose)" }}>{u.email || "—"}</td>
+                      <td style={{ color: hasValidEmail(u.email) ? undefined : "var(--accent-rose)" }}>
+                        {u.email || "—"}
+                      </td>
                       <td>{u.age}</td>
                       <td>{u.gender}</td>
                       <td>{u.area || "—"}</td>
+                      <td>
+                        <span className={`ad-match-pill ${u.marketing_opt_in ? "high" : "med"}`}>
+                          {u.marketing_opt_in ? "Opted in" : "Opted out"}
+                        </span>
+                      </td>
                     </tr>
                   );
                 })}

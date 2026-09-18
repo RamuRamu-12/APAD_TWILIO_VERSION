@@ -1,20 +1,25 @@
-from fastapi import APIRouter, Depends
+from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.orm import Session, joinedload
 
 from app.database import get_db
 from app.dependencies import get_admin_user, get_current_user
 from app.models.campaign import Campaign, TargetingRule
 from app.models.user import User
-from app.schemas.campaign import CampaignCreate, CampaignRecommendation, CampaignResponse
+from app.schemas.campaign import (
+    CampaignCreate,
+    CampaignCreateResponse,
+    CampaignRecommendation,
+    CampaignResponse,
+)
 from app.schemas.campaign_send import SendCampaignEmailRequest, SendCampaignEmailResponse
 from app.services import analytics_engine
 from app.services.audience_matching import get_matching_campaigns, get_matching_users
-from app.services.campaign_email import send_campaign_to_users
+from app.services.campaign_email import send_campaign_to_opted_in_audience, send_campaign_to_users
 
 router = APIRouter(prefix="/campaigns", tags=["campaigns"])
 
 
-@router.post("/create", response_model=CampaignResponse)
+@router.post("/create", response_model=CampaignCreateResponse)
 def create_campaign(
     data: CampaignCreate,
     db: Session = Depends(get_db),
@@ -46,8 +51,28 @@ def create_campaign(
         )
     db.commit()
     db.refresh(campaign)
-    analytics_engine.track_event(db, "campaign_created", metadata={"campaign_id": campaign.id})
-    return campaign
+    campaign_id = campaign.id
+    analytics_engine.track_event(db, "campaign_created", metadata={"campaign_id": campaign_id})
+
+    email_send: SendCampaignEmailResponse | None = None
+    try:
+        email_send = send_campaign_to_opted_in_audience(db, campaign_id)
+    except HTTPException:
+        email_send = None
+    except Exception:
+        email_send = None
+
+    campaign = (
+        db.query(Campaign)
+        .options(joinedload(Campaign.targeting_rules))
+        .filter(Campaign.id == campaign_id)
+        .first()
+    )
+    if not campaign:
+        raise HTTPException(status_code=404, detail="Campaign not found")
+    return CampaignCreateResponse.model_validate(campaign).model_copy(
+        update={"email_send": email_send}
+    )
 
 
 @router.get("", response_model=list[CampaignResponse])
@@ -92,4 +117,6 @@ def campaign_audience_size(
     db: Session = Depends(get_db),
     _: User = Depends(get_admin_user),
 ):
-    return {"count": len(get_matching_users(db, campaign_id))}
+    matching = get_matching_users(db, campaign_id)
+    opted_in = [u for u in matching if u.marketing_opt_in]
+    return {"count": len(matching), "opted_in_count": len(opted_in)}

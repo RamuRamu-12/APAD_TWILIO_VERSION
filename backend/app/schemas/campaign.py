@@ -1,5 +1,7 @@
 from pydantic import BaseModel, Field
 
+from app.schemas.campaign_send import SendCampaignEmailResponse
+
 
 class TargetingRuleCreate(BaseModel):
     min_age: int = 0
@@ -52,3 +54,7 @@ class CampaignResponse(BaseModel):
     targeting_rules: list[TargetingRuleResponse] = []
 
     model_config = {"from_attributes": True}
+
+
+class CampaignCreateResponse(CampaignResponse):
+    email_send: SendCampaignEmailResponse | None = None

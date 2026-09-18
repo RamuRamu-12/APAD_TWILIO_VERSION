@@ -812,6 +812,12 @@ input:checked + .toggle-slider:before {
   border: 1px solid rgba(0, 242, 254, 0.3);
 }
 
+.ad-match-pill.med {
+  background: rgba(156, 163, 175, 0.12);
+  color: var(--text-secondary);
+  border: 1px solid rgba(156, 163, 175, 0.3);
+}
+
 .enforced-ad-panel {
   text-align: center;
 }

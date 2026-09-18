@@ -1,9 +1,14 @@
+from datetime import datetime, timezone
+
 from fastapi import HTTPException
 from sqlalchemy.orm import Session
 
+from app.models.ad_completion import AdCompletion
+from app.models.analytics_event import AnalyticsEvent
+from app.models.generated_token import GeneratedToken
+from app.models.otp_log import OtpLog
 from app.models.user import User
-from app.schemas.user import UserRegister
-from app.utils.jwt import create_access_token
+from app.schemas.user import UserRegister, UserUpdate
 from app.utils.security import hash_password, verify_password
 
 
@@ -14,6 +19,7 @@ def register_user(db: Session, data: UserRegister) -> User:
     if db.query(User).filter(User.email == email).first():
         raise HTTPException(status_code=400, detail="Email already registered")
 
+    opted_in = bool(data.marketing_opt_in)
     user = User(
         name=data.name,
         mobile=data.mobile,
@@ -22,8 +28,77 @@ def register_user(db: Session, data: UserRegister) -> User:
         gender=data.gender,
         area=data.area,
         role="user",
+        marketing_opt_in=opted_in,
+        marketing_consent_updated_at=datetime.now(timezone.utc) if opted_in else None,
     )
     db.add(user)
+    db.commit()
+    db.refresh(user)
+    return user
+
+
+def get_regular_user(db: Session, user_id: int) -> User:
+    user = db.query(User).filter(User.id == user_id, User.role == "user").first()
+    if not user:
+        raise HTTPException(status_code=404, detail="User not found")
+    return user
+
+
+def update_user(db: Session, user_id: int, data: UserUpdate) -> User:
+    user = get_regular_user(db, user_id)
+    email = data.email.strip().lower()
+
+    mobile_conflict = (
+        db.query(User)
+        .filter(User.mobile == data.mobile, User.id != user_id)
+        .first()
+    )
+    if mobile_conflict:
+        raise HTTPException(status_code=400, detail="Mobile number already registered")
+
+    email_conflict = (
+        db.query(User).filter(User.email == email, User.id != user_id).first()
+    )
+    if email_conflict:
+        raise HTTPException(status_code=400, detail="Email already registered")
+
+    opted_in = bool(data.marketing_opt_in)
+    consent_changed = user.marketing_opt_in != opted_in
+
+    user.name = data.name
+    user.mobile = data.mobile
+    user.email = email
+    user.age = data.age
+    user.gender = data.gender
+    user.area = data.area
+    user.marketing_opt_in = opted_in
+    if consent_changed:
+        user.marketing_consent_updated_at = datetime.now(timezone.utc)
+
+    db.commit()
+    db.refresh(user)
+    return user
+
+
+def delete_user(db: Session, user_id: int) -> None:
+    user = get_regular_user(db, user_id)
+    db.query(GeneratedToken).filter(GeneratedToken.user_id == user_id).delete(
+        synchronize_session=False
+    )
+    db.query(OtpLog).filter(OtpLog.user_id == user_id).delete(synchronize_session=False)
+    db.query(AdCompletion).filter(AdCompletion.user_id == user_id).delete(
+        synchronize_session=False
+    )
+    db.query(AnalyticsEvent).filter(AnalyticsEvent.user_id == user_id).delete(
+        synchronize_session=False
+    )
+    db.delete(user)
+    db.commit()
+
+
+def set_marketing_opt_in(db: Session, user: User, opted_in: bool) -> User:
+    user.marketing_opt_in = opted_in
+    user.marketing_consent_updated_at = datetime.now(timezone.utc)
     db.commit()
     db.refresh(user)
     return user

@@ -142,6 +142,27 @@ def _migrate_mobiles_to_e164() -> None:
         db.close()
 
 
+def _ensure_user_marketing_opt_in_column() -> None:
+    from sqlalchemy import inspect, text
+
+    insp = inspect(engine)
+    if "users" not in insp.get_table_names():
+        return
+    columns = {col["name"] for col in insp.get_columns("users")}
+    if "marketing_opt_in" in columns and "marketing_consent_updated_at" in columns:
+        return
+    with engine.begin() as conn:
+        if "marketing_opt_in" not in columns:
+            # Postgres rejects BOOLEAN DEFAULT 0 (integer); FALSE works on Postgres and SQLite.
+            conn.execute(
+                text("ALTER TABLE users ADD COLUMN marketing_opt_in BOOLEAN DEFAULT FALSE")
+            )
+        if "marketing_consent_updated_at" not in columns:
+            conn.execute(
+                text("ALTER TABLE users ADD COLUMN marketing_consent_updated_at TIMESTAMP")
+            )
+
+
 def init_db() -> None:
     from app import models  # noqa: F401
 
@@ -149,6 +170,7 @@ def init_db() -> None:
     _ensure_campaign_priority_column()
     _ensure_ad_completion_gate_column()
     _ensure_user_email_column()
+    _ensure_user_marketing_opt_in_column()
     _migrate_mobiles_to_e164()
 
 

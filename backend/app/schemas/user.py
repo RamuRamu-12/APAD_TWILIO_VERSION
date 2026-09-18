@@ -10,6 +10,7 @@ class UserRegister(BaseModel):
     age: int = Field(ge=1, le=120)
     gender: str
     area: str
+    marketing_opt_in: bool = False
 
     @field_validator("mobile")
     @classmethod
@@ -45,8 +46,32 @@ class UserResponse(BaseModel):
     gender: str
     area: str
     role: str
+    marketing_opt_in: bool = False
 
     model_config = {"from_attributes": True}
+
+
+class UserUpdate(BaseModel):
+    name: str = Field(min_length=1, max_length=120)
+    mobile: str = Field(min_length=8, max_length=20)
+    email: EmailStr
+    age: int = Field(ge=1, le=120)
+    gender: str
+    area: str
+    marketing_opt_in: bool = False
+
+    @field_validator("mobile")
+    @classmethod
+    def validate_mobile(cls, v: str) -> str:
+        return normalize_mobile(v)
+
+
+class MarketingOptInUpdate(BaseModel):
+    marketing_opt_in: bool
+
+
+class UnsubscribeRequest(BaseModel):
+    token: str = Field(min_length=1)
 
 
 class TokenResponse(BaseModel):

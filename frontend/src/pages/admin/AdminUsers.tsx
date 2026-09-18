@@ -11,13 +11,16 @@ const emptyForm = {
   age: 25,
   gender: "male",
   area: "",
+  marketing_opt_in: false,
 };
 
 export default function AdminUsers() {
   const { showToast } = useToast();
   const [users, setUsers] = useState<User[]>([]);
   const [form, setForm] = useState(emptyForm);
+  const [editingId, setEditingId] = useState<number | null>(null);
   const [loading, setLoading] = useState(false);
+  const [deletingId, setDeletingId] = useState<number | null>(null);
 
   const loadAll = useCallback(() => {
     return api.get<User[]>("/api/users").then((r) => setUsers(r.data));
@@ -31,28 +34,77 @@ export default function AdminUsers() {
     setForm((f) => ({ ...f, [key]: value }));
   };
 
-  const create = async (e: FormEvent) => {
+  const cancelEdit = () => {
+    setEditingId(null);
+    setForm(emptyForm);
+  };
+
+  const startEdit = (user: User) => {
+    setEditingId(user.id);
+    setForm({
+      name: user.name,
+      mobile: user.mobile,
+      email: user.email || "",
+      age: user.age,
+      gender: user.gender || "male",
+      area: user.area || "",
+      marketing_opt_in: !!user.marketing_opt_in,
+    });
+    window.scrollTo({ top: 0, behavior: "smooth" });
+  };
+
+  const save = async (e: FormEvent) => {
     e.preventDefault();
     setLoading(true);
+    const payload = {
+      name: form.name,
+      mobile: form.mobile,
+      email: form.email,
+      age: Number(form.age),
+      gender: form.gender,
+      area: form.area,
+      marketing_opt_in: form.marketing_opt_in,
+    };
     try {
-      await api.post("/api/users", {
-        name: form.name,
-        mobile: form.mobile,
-        email: form.email,
-        age: Number(form.age),
-        gender: form.gender,
-        area: form.area,
-      });
-      setForm(emptyForm);
+      if (editingId == null) {
+        await api.post("/api/users", payload);
+        showToast("User account created");
+      } else {
+        await api.patch(`/api/users/${editingId}`, payload);
+        showToast("User account updated");
+      }
+      cancelEdit();
       await loadAll();
-      showToast("User account created");
     } catch (err: unknown) {
       const msg =
         (err as { response?: { data?: { detail?: string } } })?.response?.data?.detail ||
-        "Could not create user";
+        (editingId == null ? "Could not create user" : "Could not update user");
       showToast(String(msg), true);
     } finally {
       setLoading(false);
+    }
+  };
+
+  const removeUser = async (user: User) => {
+    const ok = window.confirm(
+      `Delete ${user.name} (${user.mobile})?\n\nThis removes the account and related tokens, OTP logs, and ad completions.`
+    );
+    if (!ok) return;
+    setDeletingId(user.id);
+    try {
+      await api.delete(`/api/users/${user.id}`);
+      if (editingId === user.id) {
+        cancelEdit();
+      }
+      await loadAll();
+      showToast("User deleted");
+    } catch (err: unknown) {
+      const msg =
+        (err as { response?: { data?: { detail?: string } } })?.response?.data?.detail ||
+        "Could not delete user";
+      showToast(String(msg), true);
+    } finally {
+      setDeletingId(null);
     }
   };
 
@@ -62,15 +114,17 @@ export default function AdminUsers() {
         <div>
           <h1 style={{ fontSize: "1.75rem", marginBottom: "0.25rem" }}>User accounts</h1>
           <p style={{ color: "var(--text-secondary)", fontSize: "0.9rem" }}>
-            Create and manage user accounts.
+            Create, edit, and delete user accounts.
           </p>
         </div>
       </div>
 
       <div className="glass-panel" style={{ padding: "1.5rem", marginBottom: "2rem" }}>
-        <h2 style={{ fontSize: "1.1rem", marginBottom: "1rem" }}>Add user</h2>
+        <h2 style={{ fontSize: "1.1rem", marginBottom: "1rem" }}>
+          {editingId == null ? "Add user" : `Edit user #${editingId}`}
+        </h2>
         <form
-          onSubmit={create}
+          onSubmit={save}
           style={{ display: "grid", gap: "1rem", gridTemplateColumns: "repeat(auto-fit, minmax(200px, 1fr))" }}
         >
           <div className="form-group">
@@ -98,7 +152,8 @@ export default function AdminUsers() {
               className="form-input"
               value={form.age}
               onChange={(e) => set("age", Number(e.target.value))}
-              min={0}
+              min={1}
+              max={120}
             />
           </div>
           <div className="form-group">
@@ -117,10 +172,34 @@ export default function AdminUsers() {
             <label className="form-label">City</label>
             <input className="form-input" value={form.area} onChange={(e) => set("area", e.target.value)} />
           </div>
-          <div style={{ gridColumn: "1 / -1" }}>
+          <label
+            className="form-group"
+            style={{ display: "flex", alignItems: "center", gap: "0.6rem", cursor: "pointer" }}
+          >
+            <input
+              type="checkbox"
+              checked={form.marketing_opt_in}
+              onChange={(e) => set("marketing_opt_in", e.target.checked)}
+            />
+            <span className="form-label" style={{ marginBottom: 0 }}>
+              Opt in to campaign emails
+            </span>
+          </label>
+          <div style={{ gridColumn: "1 / -1", display: "flex", gap: "0.75rem", flexWrap: "wrap" }}>
             <button type="submit" className="nav-btn active" disabled={loading} style={{ color: "#000" }}>
-              {loading ? "Creating…" : "Create user"}
+              {loading
+                ? editingId == null
+                  ? "Creating…"
+                  : "Saving…"
+                : editingId == null
+                  ? "Create user"
+                  : "Save changes"}
             </button>
+            {editingId != null && (
+              <button type="button" className="nav-btn" onClick={cancelEdit} disabled={loading}>
+                Cancel
+              </button>
+            )}
           </div>
         </form>
       </div>
@@ -140,17 +219,46 @@ export default function AdminUsers() {
                   <th>Age</th>
                   <th>Gender</th>
                   <th>City</th>
+                  <th>Campaign emails</th>
+                  <th>Actions</th>
                 </tr>
               </thead>
               <tbody>
                 {users.map((u) => (
-                  <tr key={u.id}>
+                  <tr key={u.id} style={editingId === u.id ? { outline: "1px solid var(--accent-cyan)" } : undefined}>
                     <td style={{ fontWeight: 600 }}>{u.name}</td>
                     <td>{u.mobile}</td>
                     <td>{u.email || "—"}</td>
                     <td>{u.age}</td>
                     <td>{u.gender}</td>
                     <td>{u.area || "—"}</td>
+                    <td>
+                      <span className={`ad-match-pill ${u.marketing_opt_in ? "high" : "med"}`}>
+                        {u.marketing_opt_in ? "Opted in" : "Opted out"}
+                      </span>
+                    </td>
+                    <td>
+                      <div style={{ display: "flex", gap: "0.4rem", flexWrap: "wrap" }}>
+                        <button
+                          type="button"
+                          className="nav-btn"
+                          style={{ padding: "0.35rem 0.7rem", fontSize: "0.8rem" }}
+                          onClick={() => startEdit(u)}
+                          disabled={loading || deletingId === u.id}
+                        >
+                          Edit
+                        </button>
+                        <button
+                          type="button"
+                          className="nav-btn nav-btn-logout"
+                          style={{ padding: "0.35rem 0.7rem", fontSize: "0.8rem" }}
+                          onClick={() => removeUser(u)}
+                          disabled={loading || deletingId === u.id}
+                        >
+                          {deletingId === u.id ? "Deleting…" : "Delete"}
+                        </button>
+                      </div>
+                    </td>
                   </tr>
                 ))}
               </tbody>

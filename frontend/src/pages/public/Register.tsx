@@ -35,6 +35,7 @@ export default function Register() {
     area: LOCATION_OPTIONS[0],
   });
   const [selectedPrefs, setSelectedPrefs] = useState<string[]>([]);
+  const [marketingOptIn, setMarketingOptIn] = useState(false);
   const [loading, setLoading] = useState(false);
 
   const isNameValid = form.name.trim().length >= 2;
@@ -89,6 +90,7 @@ export default function Register() {
         age: Number(form.age),
         gender: form.gender,
         area: form.area,
+        marketing_opt_in: marketingOptIn,
       });
       showToast("Registration successful! Please sign in.", false);
       navigate("/login", { state: { mobile: form.mobile } });
@@ -326,6 +328,32 @@ export default function Register() {
                 ))}
               </div>
             </div>
+
+            <label
+              className="form-group"
+              style={{
+                display: "flex",
+                alignItems: "flex-start",
+                gap: "0.75rem",
+                marginBottom: "1.5rem",
+                cursor: "pointer",
+              }}
+            >
+              <input
+                type="checkbox"
+                checked={marketingOptIn}
+                onChange={(e) => setMarketingOptIn(e.target.checked)}
+                style={{ marginTop: "0.3rem", width: "1.05rem", height: "1.05rem", flexShrink: 0 }}
+              />
+              <span>
+                <span className="form-label" style={{ display: "block", marginBottom: "0.25rem" }}>
+                  Email me personalized offers and campaigns
+                </span>
+                <span className="text-muted" style={{ fontSize: "0.8rem", lineHeight: 1.45 }}>
+                  Optional. Your account is created either way. You can unsubscribe anytime.
+                </span>
+              </span>
+            </label>
 
             <div className="step-action-row">
               <button type="button" className="back-btn" onClick={() => setStep(1)}>

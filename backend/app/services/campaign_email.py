@@ -1,9 +1,23 @@
+from urllib.parse import quote
+
 from sqlalchemy.orm import Session, joinedload
 
 from app.models.campaign import Campaign
 from app.models.user import User
 from app.services import analytics_engine, email_provider, token_generator
+from app.services.audience_matching import get_matching_users
 from app.schemas.campaign_send import SendCampaignEmailResponse, SendCampaignEmailResult
+from app.utils.unsubscribe import create_unsubscribe_token
+
+
+def send_campaign_to_opted_in_audience(
+    db: Session, campaign_id: int
+) -> SendCampaignEmailResponse:
+    matching = get_matching_users(db, campaign_id)
+    user_ids = [u.id for u in matching if u.marketing_opt_in]
+    if not user_ids:
+        return SendCampaignEmailResponse(sent=0, skipped=0, failed=0, results=[])
+    return send_campaign_to_users(db, campaign_id, user_ids)
 
 
 def send_campaign_to_users(
@@ -59,6 +73,18 @@ def send_campaign_to_users(
             skipped += 1
             continue
 
+        if not user.marketing_opt_in:
+            results.append(
+                SendCampaignEmailResult(
+                    user_id=user.id,
+                    email=email,
+                    status="skipped",
+                    message="User has not opted in to campaign emails",
+                )
+            )
+            skipped += 1
+            continue
+
         links = token_generator.generate_tokens_for_campaign(
             db, campaign_id, user_ids=[user.id], match_audience=False
         )
@@ -76,6 +102,10 @@ def send_campaign_to_users(
 
         token = links[0]["token"]
         preview_url = f"{settings.backend_base_url.rstrip('/')}/preview/{token}"
+        unsubscribe_url = (
+            f"{settings.frontend_base_url.rstrip('/')}/unsubscribe"
+            f"?token={quote(create_unsubscribe_token(user.id), safe='')}"
+        )
 
         subject, html, text = email_provider.build_campaign_email(
             user_name=user.name,
@@ -84,6 +114,7 @@ def send_campaign_to_users(
             image_url=campaign.image_url,
             preview_url=preview_url,
             app_name=settings.app_name,
+            unsubscribe_url=unsubscribe_url,
         )
 
         send_result = email_provider.send_campaign_email(email, subject, html, text)

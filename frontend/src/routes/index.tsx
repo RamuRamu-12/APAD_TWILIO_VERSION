@@ -6,6 +6,7 @@ import ProtectedRoute from "./ProtectedRoute";
 import Home from "../pages/public/Home";
 import Register from "../pages/public/Register";
 import Login from "../pages/public/Login";
+import Unsubscribe from "../pages/public/Unsubscribe";
 import GetOtp from "../pages/public/GetOtp";
 import AdWatch from "../pages/ads/AdWatch";
 import AdPreview from "../pages/ads/AdPreview";
@@ -28,6 +29,7 @@ export default function AppRoutes() {
         <Route path="/" element={<Home />} />
         <Route path="/register" element={<Register />} />
         <Route path="/login" element={<Login />} />
+        <Route path="/unsubscribe" element={<Unsubscribe />} />
         <Route path="/admin/login" element={<AdminLogin />} />
         <Route path="/get-otp" element={<GetOtp />} />
         <Route path="/ad-watch" element={<AdWatch />} />

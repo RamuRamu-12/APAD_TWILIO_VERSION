@@ -12,6 +12,7 @@ def search_users(
     gender: str | None = None,
     area: str | None = None,
     q: str | None = None,
+    marketing_opt_in: bool | None = None,
 ) -> list[User]:
     query = db.query(User).filter(User.role == "user")
 
@@ -33,5 +34,7 @@ def search_users(
                 User.mobile.ilike(needle),
             )
         )
+    if marketing_opt_in is not None:
+        query = query.filter(User.marketing_opt_in.is_(marketing_opt_in))
 
     return query.order_by(User.id.desc()).all()

@@ -3,14 +3,17 @@ import { Link } from "react-router-dom";
 import AdCard from "../../components/ads/AdCard";
 import { api } from "../../lib/api";
 import { useAuth } from "../../hooks/useAuth";
+import { useToast } from "../../context/ToastContext";
 import { trackEvent } from "../../lib/analytics";
 import { getInterests } from "../../lib/uiPrefs";
-import type { Campaign } from "../../types/api";
+import type { Campaign, User } from "../../types/api";
 
 export default function Dashboard() {
-  const { user } = useAuth();
+  const { user, updateUser } = useAuth();
+  const { showToast } = useToast();
   const [campaigns, setCampaigns] = useState<Campaign[]>([]);
   const [adsLoading, setAdsLoading] = useState(true);
+  const [optInSaving, setOptInSaving] = useState(false);
   const interests = getInterests();
 
   const fetchAds = useCallback(() => {
@@ -21,6 +24,25 @@ export default function Dashboard() {
       .catch(() => setCampaigns([]))
       .finally(() => setAdsLoading(false));
   }, []);
+
+  const toggleMarketingOptIn = async (checked: boolean) => {
+    setOptInSaving(true);
+    try {
+      const { data } = await api.patch<User>("/api/me/marketing-opt-in", {
+        marketing_opt_in: checked,
+      });
+      updateUser(data);
+      showToast(
+        checked
+          ? "You will receive campaign emails."
+          : "You will no longer receive campaign emails."
+      );
+    } catch {
+      showToast("Could not update email preference", true);
+    } finally {
+      setOptInSaving(false);
+    }
+  };
 
   useEffect(() => {
     trackEvent("portal_view", { userId: user?.id });
@@ -75,6 +97,35 @@ export default function Dashboard() {
             <span className="profile-field-label">Contact</span>
             <span className="profile-field-val" style={{ fontSize: "0.85rem" }}>{user?.mobile}</span>
           </div>
+
+          <label
+            className="profile-field"
+            style={{
+              borderBottom: "none",
+              cursor: "pointer",
+              alignItems: "flex-start",
+              gap: "0.75rem",
+              marginTop: "0.5rem",
+            }}
+          >
+            <input
+              type="checkbox"
+              checked={!!user?.marketing_opt_in}
+              disabled={optInSaving}
+              onChange={(e) => toggleMarketingOptIn(e.target.checked)}
+              style={{ marginTop: "0.2rem", width: "1.05rem", height: "1.05rem", flexShrink: 0 }}
+            />
+            <span>
+              <span className="profile-field-label" style={{ display: "block" }}>
+                Campaign emails
+              </span>
+              <span className="text-muted" style={{ fontSize: "0.8rem", lineHeight: 1.4 }}>
+                {user?.marketing_opt_in
+                  ? "You are opted in. Uncheck to stop campaign emails."
+                  : "Opt in to receive personalized campaign emails."}
+              </span>
+            </span>
+          </label>
         </div>
 
         <div className="ads-section">
