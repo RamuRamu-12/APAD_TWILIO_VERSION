@@ -49,8 +49,15 @@ class Settings(BaseSettings):
     twilio_account_sid: str = ""
     twilio_auth_token: str = ""
     twilio_from_number: str = ""
+    twilio_messaging_service_sid: str = ""
+    twilio_phone_number_sid: str = ""
     twilio_verify_service_sid: str = ""
     twilio_otp_channel: str = "sms"
+    otp_sms_template: str = (
+        "Quantum Ad Tech, Inc: Your one-time password is {otp}. "
+        "It expires in 10 minutes. Do not share this code with anyone. "
+        "Reply STOP to opt out."
+    )
 
     default_phone_region: str = "IN"
 
@@ -63,7 +70,12 @@ class Settings(BaseSettings):
 
     @property
     def uses_twilio_verify(self) -> bool:
-        return self.sms_provider.lower() == "twilio"
+        mode = self.sms_provider.lower()
+        return mode in ("twilio", "twilio_verify")
+
+    @property
+    def uses_twilio_messaging(self) -> bool:
+        return self.sms_provider.lower() == "twilio_messaging"
 
     @property
     def cors_origin_list(self) -> list[str]:

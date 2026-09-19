@@ -70,7 +70,17 @@ async def send_otp(db: Session, mobile: str, token: str | None) -> dict:
     )
     db.commit()
 
-    result = await provider.send_otp(user.mobile, code, promo)
+    try:
+        result = await provider.send_otp(user.mobile, code, promo)
+    except TwilioRestException as exc:
+        log_twilio_error(exc, "Messaging send")
+        raise HTTPException(
+            status_code=twilio_http_status(exc),
+            detail=twilio_user_message(exc),
+        ) from exc
+    except ValueError as exc:
+        raise HTTPException(status_code=400, detail=str(exc)) from exc
+
     preview = result.preview_text
     otp_for_screen = None
 

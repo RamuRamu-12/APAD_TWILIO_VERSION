@@ -71,7 +71,9 @@ App: http://localhost:5173
 | `CORS_ORIGINS` | Allowed frontend origins | `http://localhost:5173` |
 | `FRONTEND_BASE_URL` | Token links & OG redirects | `http://localhost:5173` |
 | `BACKEND_BASE_URL` | Preview URL base | `http://localhost:8000` |
-| `SMS_PROVIDER` | `mock` (dev) \| `twilio` (Verify SMS) | `mock` |
+| `SMS_PROVIDER` | `mock` \| `twilio_messaging` (approved OTP template) \| `twilio` (Verify) | `mock` |
+| `TWILIO_MESSAGING_SERVICE_SID` | With `twilio_messaging` — Messaging Service `MG...` | — |
+| `OTP_SMS_TEMPLATE` | Exact approved text; `{otp}` placeholder | See `.env.example` |
 | `TWILIO_VERIFY_SERVICE_SID` | Required when `SMS_PROVIDER=twilio` | — |
 | `OTP_SIMULATION_MODE` | POC OTP mode | `true` |
 | `OTP_SHOW_ON_SCREEN` | Return OTP in API for UI (mock only) | `true` |

@@ -1,57 +1,65 @@
-# Twilio Verify — APAD login OTP
+# Twilio OTP — APAD login
 
 End-user flow: **Register/Login → Ad 1 → Ad 2 → SMS OTP → Enter code → Dashboard**
 
-## Phone numbers
+## Recommended: Programmable Messaging (`twilio_messaging`)
 
-All mobiles are stored in **E.164** format (e.g. `+14155552671`, `+919876543210`).
+Uses your **approved 10DLC OTP template** (only `{otp}` changes per user). APAD generates the code and verifies it in the database.
 
-- Register/Login use a **country picker**; pick country, enter local number.
-- Backend validates with `phonenumbers` and `DEFAULT_PHONE_REGION=IN` for legacy bare numbers.
-- Twilio Verify accepts any valid international E.164 number (trial may restrict destinations).
+### Twilio Console
 
-## 1. Twilio Console
+1. **Paid account** with **US 10DLC campaign** approved.
+2. **Messaging Service** (`MG...`) with at least one **US SMS number** assigned.
+3. **Messaging → Geo permissions** — enable destinations you send to (US for 10DLC).
+4. **Advanced Opt-Out** on the Messaging Service if your template includes `Reply STOP`.
 
-1. Create account at [twilio.com](https://www.twilio.com).
-2. **Verify** → **Services** → Create service → copy **Service SID** (`VA...`).
-3. Copy **Account SID** and **Auth Token** from the dashboard.
+Note: **`PN...` is a phone number SID** (Console reference). The API uses **`TWILIO_MESSAGING_SERVICE_SID`** (`MG...`) and/or **`TWILIO_FROM_NUMBER`** (`+1...`).
 
-Trial accounts usually only send SMS to **verified** phone numbers (max 5).
+### Backend `.env`
 
-### If OTP fails for one number but works for another
+```env
+SMS_PROVIDER=twilio_messaging
+TWILIO_ACCOUNT_SID=ACxxxxxxxx
+TWILIO_AUTH_TOKEN=xxxxxxxx
+TWILIO_MESSAGING_SERVICE_SID=MGxxxxxxxx
+TWILIO_FROM_NUMBER=+1857xxxxxxx
+OTP_TTL_SECONDS=600
+OTP_SIMULATION_MODE=false
+OTP_SHOW_ON_SCREEN=false
+OTP_SMS_TEMPLATE=Quantum Ad Tech, Inc: Your one-time password is {otp}. It expires in 10 minutes. Do not share this code with anyone. Reply STOP to opt out.
+```
 
-This is almost always a **Twilio account restriction**, not your app code or the user’s physical location (e.g. Indian +91 number in Arizona vs India — Twilio routes to the same +91 destination).
+Restart the API after changing `.env`.
 
-| Symptom | Likely cause | Fix |
-| ------- | ------------ | --- |
-| Works for one mobile, fails for another | Destination not on **Verified Caller IDs** (trial error **21608**) | Twilio Console → **Phone Numbers** → **Manage** → **Verified Caller IDs** → add `+919848264464` (must receive Twilio’s verify SMS on that phone) |
-| Need any user to get OTP without pre-verifying | Trial limit | **Upgrade** Twilio account (add payment method) |
-| SMS blocked by country | Geo permissions | **Messaging** → **Settings** → **Geo permissions** → enable India (+91) |
+---
 
-After a failed send, check your API terminal logs — you will see `Twilio Verify send failed: code=21608 ...` when the number is unverified.
+## Legacy: Twilio Verify (`twilio` / `twilio_verify`)
 
-## 2. Backend `.env`
+Verify sends its **own** SMS wording — not your 10DLC template. Use only if you do not need a fixed body.
 
 ```env
 SMS_PROVIDER=twilio
-TWILIO_ACCOUNT_SID=ACxxxxxxxx
-TWILIO_AUTH_TOKEN=xxxxxxxx
 TWILIO_VERIFY_SERVICE_SID=VAxxxxxxxx
-TWILIO_OTP_CHANNEL=sms
-
-OTP_SIMULATION_MODE=false
-OTP_SHOW_ON_SCREEN=false
 ```
 
-Install dependency: `pip install -r requirements.txt`
+Trial accounts usually only send to **verified** destination numbers (max 5). Paid accounts + geo permissions allow any valid E.164.
 
-## 3. Local test
+---
+
+## Phone numbers in APAD
+
+All mobiles are stored in **E.164** (e.g. `+14155552671`, `+919876543210`).
+
+- Register/Login use a **country picker**.
+- You do **not** add each user’s mobile in Twilio on a paid account.
+
+## Local test
 
 1. Start API and frontend (`README.md`).
-2. Register or use demo user `9876543210`.
-3. `/login` → complete both ads → check phone for SMS → enter code on `/otp-verification`.
+2. Register with a **US mobile** if using US 10DLC sender.
+3. Login → complete both ads → SMS OTP → verify.
 
-## 4. Local POC (no Twilio)
+## Local POC (no Twilio)
 
 ```env
 SMS_PROVIDER=mock
@@ -59,8 +67,6 @@ OTP_SHOW_ON_SCREEN=true
 OTP_SIMULATION_MODE=true
 ```
 
-OTP appears on the verification screen instead of SMS.
-
-## 5. Render
+## Render
 
 See [RENDER_DEPLOYMENT.md](../RENDER_DEPLOYMENT.md) for production env vars.
