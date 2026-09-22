@@ -163,12 +163,30 @@ def _ensure_user_marketing_opt_in_column() -> None:
             )
 
 
+def _ensure_ad_completion_gate_video_columns() -> None:
+    from sqlalchemy import inspect, text
+
+    insp = inspect(engine)
+    if "ad_completions" not in insp.get_table_names():
+        return
+    columns = {col["name"] for col in insp.get_columns("ad_completions")}
+    with engine.begin() as conn:
+        if "location_gate_video_id" not in columns:
+            conn.execute(
+                text(
+                    "ALTER TABLE ad_completions ADD COLUMN location_gate_video_id INTEGER"
+                )
+            )
+        # SQLite cannot ALTER nullable easily; new DBs get nullable campaign_id from model.
+
+
 def init_db() -> None:
     from app import models  # noqa: F401
 
     Base.metadata.create_all(bind=engine)
     _ensure_campaign_priority_column()
     _ensure_ad_completion_gate_column()
+    _ensure_ad_completion_gate_video_columns()
     _ensure_user_email_column()
     _ensure_user_marketing_opt_in_column()
     _migrate_mobiles_to_e164()

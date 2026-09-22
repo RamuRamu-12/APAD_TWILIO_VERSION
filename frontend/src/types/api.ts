@@ -21,6 +21,7 @@ export type AdGate = "login" | "otp_request" | "email";
 export interface AdWatchPayload {
   gate: AdGate;
   campaign_id: number;
+  location_gate_video_id?: number | null;
   campaign_name: string;
   user_mobile: string;
   user_name: string;
@@ -30,6 +31,7 @@ export interface AdWatchPayload {
   creative_url: string;
   creative_type: string;
   min_watch_seconds: number;
+  location_name?: string | null;
 }
 
 export interface SendOtpResponse {
@@ -38,6 +40,26 @@ export interface SendOtpResponse {
   message: string;
   otp_for_screen?: string | null;
   sms_preview?: string | null;
+}
+
+export interface GateVideo {
+  id: number;
+  area: string;
+  youtube_url: string;
+  title: string;
+  min_watch_seconds: number;
+  is_active: boolean;
+}
+
+export interface Location {
+  id: number;
+  name: string;
+  is_active: boolean;
+}
+
+export interface GateVideoCatalog {
+  locations: Location[];
+  global_area_key: string;
 }
 
 export interface TargetingRule {

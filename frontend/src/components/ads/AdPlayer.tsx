@@ -1,6 +1,8 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { DEFAULT_FALLBACK_VIDEO, FALLBACK_AD_VIDEOS } from "../../lib/fallbackVideos";
+import { isYoutubeCreative } from "../../lib/youtube";
 import type { AdWatchPayload } from "../../types/api";
+import YoutubeGatePlayer from "./YoutubeGatePlayer";
 
 interface Props {
   payload: AdWatchPayload;
@@ -15,7 +17,8 @@ export default function AdPlayer({ payload, onComplete, onProgress }: Props) {
   onCompleteRef.current = onComplete;
 
   const minSeconds = payload.min_watch_seconds;
-  const isVideo = payload.creative_type === "video";
+  const isYoutube = isYoutubeCreative(payload.creative_type, payload.creative_url);
+  const isVideo = !isYoutube && payload.creative_type === "video";
 
   const [seconds, setSeconds] = useState(0);
   const [done, setDone] = useState(false);
@@ -55,7 +58,7 @@ export default function AdPlayer({ payload, onComplete, onProgress }: Props) {
   );
 
   useEffect(() => {
-    if (isVideo) return;
+    if (isVideo || isYoutube) return;
     const t = setInterval(() => {
       setSeconds((s) => {
         const next = s + 1;
@@ -65,7 +68,7 @@ export default function AdPlayer({ payload, onComplete, onProgress }: Props) {
       });
     }, 1000);
     return () => clearInterval(t);
-  }, [isVideo, tryComplete]);
+  }, [isVideo, isYoutube, tryComplete]);
 
   useEffect(() => {
     if (!isVideo) return;
@@ -115,22 +118,46 @@ export default function AdPlayer({ payload, onComplete, onProgress }: Props) {
 
   return (
     <div style={{ overflow: "hidden" }}>
-      <div
-        style={{
-          borderBottom: "1px solid var(--glass-border)",
-          padding: "1rem 0",
-          marginBottom: "1rem",
-        }}
-      >
-        <span className="badge-brand">Sponsored message</span>
-        <h3 style={{ marginTop: "0.5rem", fontSize: "1.1rem" }}>{payload.personalized_title}</h3>
-        <p className="text-muted" style={{ marginTop: "0.25rem", fontSize: "0.85rem" }}>
-          {payload.description}
-        </p>
-      </div>
+      {!isYoutube && (
+        <div
+          style={{
+            borderBottom: "1px solid var(--glass-border)",
+            padding: "1rem 0",
+            marginBottom: "1rem",
+          }}
+        >
+          <span className="badge-brand">Sponsored message</span>
+          <h3 style={{ marginTop: "0.5rem", fontSize: "1.1rem" }}>{payload.personalized_title}</h3>
+          <p className="text-muted" style={{ marginTop: "0.25rem", fontSize: "0.85rem" }}>
+            {payload.description}
+          </p>
+        </div>
+      )}
 
       <div>
-        {isVideo && !videoSrc ? (
+        {isYoutube ? (
+          <>
+            <h3 style={{ fontSize: "1.25rem", marginBottom: "1rem", textAlign: "center" }}>
+              {payload.personalized_title}
+            </h3>
+            <YoutubeGatePlayer
+              youtubeUrl={payload.creative_url}
+              minSeconds={minSeconds}
+              title={payload.personalized_title}
+              poster={payload.image_url}
+              onComplete={onComplete}
+              onProgress={onProgress}
+            />
+            {payload.location_name ? (
+              <p
+                className="text-muted"
+                style={{ marginTop: "0.75rem", textAlign: "center", fontSize: "0.95rem" }}
+              >
+                Location: <strong style={{ color: "var(--text-primary)" }}>{payload.location_name}</strong>
+              </p>
+            ) : null}
+          </>
+        ) : isVideo && !videoSrc ? (
           <p
             className="text-muted"
             style={{
@@ -206,28 +233,30 @@ export default function AdPlayer({ payload, onComplete, onProgress }: Props) {
           />
         )}
 
-        <div style={{ marginTop: "1rem" }}>
-          <div style={{ display: "flex", justifyContent: "space-between", fontSize: "0.85rem", marginBottom: "0.5rem" }}>
-            <span className="text-muted">Watch progress</span>
-            <span style={{ color: "var(--accent-cyan)", fontWeight: 600 }}>
-              {Math.floor(seconds)}s / {minSeconds}s required
-              {!done && remaining > 0 && isVideo && playing && (
-                <span className="text-muted"> · {remaining}s left</span>
-              )}
-            </span>
+        {!isYoutube && (
+          <div style={{ marginTop: "1rem" }}>
+            <div style={{ display: "flex", justifyContent: "space-between", fontSize: "0.85rem", marginBottom: "0.5rem" }}>
+              <span className="text-muted">Watch progress</span>
+              <span style={{ color: "var(--accent-cyan)", fontWeight: 600 }}>
+                {Math.floor(seconds)}s / {minSeconds}s required
+                {!done && remaining > 0 && isVideo && playing && (
+                  <span className="text-muted"> · {remaining}s left</span>
+                )}
+              </span>
+            </div>
+            <div className="enforced-progress-track">
+              <div
+                className="enforced-progress-fill"
+                style={{ width: `${done ? 100 : progress}%` }}
+              />
+            </div>
+            {done && (
+              <p style={{ marginTop: "0.75rem", textAlign: "center", fontSize: "0.9rem", color: "var(--accent-emerald)", fontWeight: 600 }}>
+                Thank you. Redirecting…
+              </p>
+            )}
           </div>
-          <div className="enforced-progress-track">
-            <div
-              className="enforced-progress-fill"
-              style={{ width: `${done ? 100 : progress}%` }}
-            />
-          </div>
-          {done && (
-            <p style={{ marginTop: "0.75rem", textAlign: "center", fontSize: "0.9rem", color: "var(--accent-emerald)", fontWeight: 600 }}>
-              Thank you. Redirecting…
-            </p>
-          )}
-        </div>
+        )}
       </div>
     </div>
   );

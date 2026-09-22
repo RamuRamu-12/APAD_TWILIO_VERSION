@@ -1,4 +1,4 @@
-import { FormEvent, useState } from "react";
+import { FormEvent, useEffect, useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import PhoneInput from "../../components/ui/PhoneInput";
 import {
@@ -16,11 +16,8 @@ import {
 import { useToast } from "../../context/ToastContext";
 import { apiPublic } from "../../lib/api";
 import { config } from "../../lib/config";
-import {
-  INTEREST_CATEGORIES,
-  LOCATION_OPTIONS,
-  saveInterests,
-} from "../../lib/uiPrefs";
+import { INTEREST_CATEGORIES, saveInterests } from "../../lib/uiPrefs";
+import type { Location } from "../../types/api";
 
 export default function Register() {
   const navigate = useNavigate();
@@ -32,8 +29,10 @@ export default function Register() {
     email: "",
     age: "",
     gender: "male",
-    area: LOCATION_OPTIONS[0],
+    area: "",
   });
+  const [locations, setLocations] = useState<Location[]>([]);
+  const [locationsLoading, setLocationsLoading] = useState(true);
   const [selectedPrefs, setSelectedPrefs] = useState<string[]>([]);
   const [marketingOptIn, setMarketingOptIn] = useState(false);
   const [loading, setLoading] = useState(false);
@@ -46,6 +45,19 @@ export default function Register() {
     return !isNaN(n) && n >= 1 && n <= 120;
   };
   const step1Valid = isNameValid && isEmailValid && isMobileValid && isAgeValid();
+
+  useEffect(() => {
+    apiPublic
+      .get<Location[]>("/api/locations")
+      .then((r) => {
+        setLocations(r.data);
+        if (r.data.length > 0) {
+          setForm((f) => (f.area ? f : { ...f, area: r.data[0].name }));
+        }
+      })
+      .catch(() => showToast("Could not load locations. Try again later.", true))
+      .finally(() => setLocationsLoading(false));
+  }, [showToast]);
 
   const handleNextStep = () => {
     if (!isNameValid) {
@@ -62,6 +74,10 @@ export default function Register() {
     }
     if (!isAgeValid()) {
       showToast("Please enter a valid age (between 1 and 120)", true);
+      return;
+    }
+    if (!form.area.trim()) {
+      showToast("Please select a location", true);
       return;
     }
     setStep(2);
@@ -295,12 +311,20 @@ export default function Register() {
                   className="form-input form-select"
                   value={form.area}
                   onChange={(e) => setForm({ ...form, area: e.target.value })}
+                  disabled={locationsLoading || locations.length === 0}
+                  required
                 >
-                  {LOCATION_OPTIONS.map((loc) => (
-                    <option key={loc} value={loc}>
-                      {loc}
+                  {locations.length === 0 ? (
+                    <option value="">
+                      {locationsLoading ? "Loading locations…" : "No locations available"}
                     </option>
-                  ))}
+                  ) : (
+                    locations.map((loc) => (
+                      <option key={loc.id} value={loc.name}>
+                        {loc.name}
+                      </option>
+                    ))
+                  )}
                 </select>
                 <span className="input-icon-left">
                   <IconLocation />

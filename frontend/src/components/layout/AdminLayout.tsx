@@ -1,11 +1,10 @@
-import { Link, Outlet, useLocation, useNavigate } from "react-router-dom";
+import { Link, Outlet, useLocation } from "react-router-dom";
 
 export default function AdminLayout() {
   const location = useLocation();
-  const navigate = useNavigate();
 
-  const isRegistry =
-    location.pathname === "/admin" || location.pathname === "/admin/campaigns";
+  const isGateVideos = location.pathname.startsWith("/admin/gate-videos");
+  const isRegistry = location.pathname.startsWith("/admin/campaigns");
   const isUsers = location.pathname.startsWith("/admin/users");
   const isSendCampaign = location.pathname.startsWith("/admin/send-campaign");
 
@@ -17,8 +16,11 @@ export default function AdminLayout() {
             <span aria-hidden>⚙️</span> Ad Control Center
           </div>
           <nav className="nav-links">
-            <Link to="/admin" className={`nav-btn ${isRegistry ? "active" : ""}`}>
-              Ads Registry
+            <Link to="/admin/gate-videos" className={`nav-btn ${isGateVideos ? "active" : ""}`}>
+              Gate Videos
+            </Link>
+            <Link to="/admin/campaigns" className={`nav-btn ${isRegistry ? "active" : ""}`}>
+              Campaigns
             </Link>
             <Link to="/admin/users" className={`nav-btn ${isUsers ? "active" : ""}`}>
               Users
@@ -26,9 +28,9 @@ export default function AdminLayout() {
             <Link to="/admin/send-campaign" className={`nav-btn ${isSendCampaign ? "active" : ""}`}>
               Send Campaign
             </Link>
-            <button type="button" className="nav-btn" onClick={() => navigate("/dashboard")}>
+            <Link to="/dashboard" className="nav-btn">
               Back to Portal
-            </button>
+            </Link>
           </nav>
         </header>
 

@@ -5,6 +5,7 @@ from sqlalchemy.orm import Session
 from app.config import get_settings
 from app.models.user import User
 from app.seed_campaigns import seed_campaign_catalog
+from app.services.gate_video import seed_location_gate_videos
 from app.services.auth_engine import create_admin_if_needed
 from app.utils.phone import normalize_mobile
 
@@ -14,10 +15,14 @@ def seed_demo_data(db: Session) -> None:
     admin_mobile = normalize_mobile(settings.admin_mobile)
     create_admin_if_needed(db, admin_mobile, settings.admin_password)
 
-    demo_mobile = "+919876543210"
+    demo_mobile = "+14155552671"
     demo = (
         db.query(User)
-        .filter(User.mobile.in_([demo_mobile, "9876543210"]))
+        .filter(
+            User.mobile.in_(
+                [demo_mobile, "+15555550100", "+919876543210", "9876543210"]
+            )
+        )
         .first()
     )
     if demo is None:
@@ -28,7 +33,7 @@ def seed_demo_data(db: Session) -> None:
                 email="john.demo@example.com",
                 age=28,
                 gender="male",
-                area="Hyderabad",
+                area="New York",
                 role="user",
             )
         )
@@ -41,3 +46,4 @@ def seed_demo_data(db: Session) -> None:
         db.commit()
 
     seed_campaign_catalog(db)
+    seed_location_gate_videos(db)

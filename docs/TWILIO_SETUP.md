@@ -50,7 +50,8 @@ Trial accounts usually only send to **verified** destination numbers (max 5). Pa
 
 All mobiles are stored in **E.164** (e.g. `+14155552671`, `+919876543210`).
 
-- Register/Login use a **country picker**.
+- Register/Login use a **country picker** (default **US**: `VITE_DEFAULT_PHONE_COUNTRY=US`).
+- Backend bare-number parsing: `DEFAULT_PHONE_REGION=US`.
 - You do **not** add each user’s mobile in Twilio on a paid account.
 
 ## Local test

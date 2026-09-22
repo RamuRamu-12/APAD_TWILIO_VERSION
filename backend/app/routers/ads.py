@@ -10,6 +10,7 @@ from app.schemas.ad import (
 )
 from app.services import ad_delivery, ad_completion_tracker, analytics_engine
 from app.services.ad_context import resolve_context_for_gate
+from app.services.watch_context import resolve_watch_context
 from app.services.ad_gates import GATE_LOGIN, GATE_OTP_REQUEST, VALID_GATES
 
 router = APIRouter(prefix="/ad", tags=["ads"])
@@ -34,11 +35,17 @@ def watch_ad(
 ):
     if gate not in VALID_GATES:
         raise HTTPException(status_code=400, detail="Invalid ad gate")
-    user, campaign, token_val = resolve_context_for_gate(db, token, mobile, gate)
+    ctx = resolve_watch_context(db, token, mobile, gate)
+    meta = {"gate": gate}
+    if ctx.gate_video:
+        meta["location_gate_video_id"] = ctx.gate_video.id
+        meta["area"] = ctx.user.area
+    elif ctx.campaign:
+        meta["campaign_id"] = ctx.campaign.id
     analytics_engine.track_event(
-        db, "ad_impression", user_id=user.id, token=token_val, metadata={"gate": gate}
+        db, "ad_impression", user_id=ctx.user.id, token=ctx.token_val, metadata=meta
     )
-    return ad_delivery.get_watch_payload(user, campaign, gate)
+    return ad_delivery.get_watch_payload_from_context(ctx)
 
 
 @router.post("/completed", response_model=AdCompletedResponse)

@@ -207,9 +207,10 @@ export default function AdminControlCenter() {
     <div className="animate-fade-in">
       <div className="admin-header">
         <div>
-          <h1 style={{ fontSize: "1.75rem", marginBottom: "0.25rem" }}>Active Ads Registry</h1>
-          <p style={{ color: "var(--text-secondary)", fontSize: "0.9rem" }}>
-            Configure advertisements, audience rules, and review platform activity.
+          <h1 style={{ fontSize: "1.75rem", marginBottom: "0.25rem" }}>Campaign registry</h1>
+          <p style={{ color: "var(--text-secondary)", fontSize: "0.9rem", maxWidth: "640px" }}>
+            Email campaigns and advanced targeting. For login/OTP YouTube ads by user location,
+            use <strong>Gate Videos</strong> in the admin menu.
           </p>
         </div>
         <button

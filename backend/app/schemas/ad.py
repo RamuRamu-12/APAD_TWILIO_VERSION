@@ -6,6 +6,7 @@ from app.utils.phone import normalize_mobile
 class AdWatchResponse(BaseModel):
     gate: str
     campaign_id: int
+    location_gate_video_id: int | None = None
     campaign_name: str
     user_mobile: str
     user_name: str
@@ -15,6 +16,7 @@ class AdWatchResponse(BaseModel):
     creative_url: str
     creative_type: str
     min_watch_seconds: int
+    location_name: str | None = None
 
 
 class AdCompletedRequest(BaseModel):

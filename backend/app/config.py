@@ -39,7 +39,7 @@ class Settings(BaseSettings):
     min_watch_seconds: int = 5
 
     seed_demo_data: bool = True
-    admin_mobile: str = "9999999999"
+    admin_mobile: str = "+14155552672"
     admin_password: str = "admin123"
 
     msg91_auth_key: str = ""
@@ -59,7 +59,7 @@ class Settings(BaseSettings):
         "Reply STOP to opt out."
     )
 
-    default_phone_region: str = "IN"
+    default_phone_region: str = "US"
 
     email_enabled: bool = True
     ses_from_email: str = ""

@@ -228,11 +228,19 @@ h1, h2, h3, h4, h5, h6 {
 
 .form-select {
   appearance: none;
+  cursor: pointer;
+  color-scheme: dark;
+  background-color: rgba(0, 0, 0, 0.25);
   background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 24 24' stroke='%239ca3af'%3E%3Cpath stroke-linecap='round' stroke-linejoin='round' stroke-width='2' d='M19 9l-7 7-7-7'/%3E%3C/svg%3E");
   background-repeat: no-repeat;
   background-position: right 1rem center;
   background-size: 1.25rem;
   padding-right: 2.5rem;
+}
+
+.form-select option {
+  background-color: #141422;
+  color: #ffffff;
 }
 
 .submit-btn {
@@ -309,19 +317,6 @@ h1, h2, h3, h4, h5, h6 {
   border-color: var(--accent-cyan);
   box-shadow: 0 0 12px rgba(0, 242, 254, 0.3);
   transform: scale(1.05);
-}
-
-.verify-split-container {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 2.5rem;
-  align-items: start;
-}
-
-@media (max-width: 900px) {
-  .verify-split-container {
-    grid-template-columns: 1fr;
-  }
 }
 
 .ads-section {

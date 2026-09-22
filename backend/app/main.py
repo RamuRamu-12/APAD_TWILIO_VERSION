@@ -5,7 +5,21 @@ from fastapi.middleware.cors import CORSMiddleware
 
 from app.config import get_settings
 from app.database import check_db_connection, init_db, SessionLocal
-from app.routers import ads, analytics, auth, campaigns, marketing, otp, preview, tokens, users
+from app.routers import (
+    ads,
+    analytics,
+    auth,
+    campaigns,
+    location_gate_videos,
+    locations,
+    marketing,
+    otp,
+    preview,
+    tokens,
+    users,
+)
+from app.services.gate_video import seed_location_gate_videos
+from app.services.location_service import seed_locations_if_empty
 from app.seed import seed_demo_data
 
 import logging
@@ -27,6 +41,12 @@ async def lifespan(app: FastAPI):
         raise
 
     init_db()
+    db = SessionLocal()
+    try:
+        seed_locations_if_empty(db)
+        seed_location_gate_videos(db)
+    finally:
+        db.close()
     if settings.seed_demo_data:
         db = SessionLocal()
         try:
@@ -51,6 +71,8 @@ api = settings.api_prefix
 app.include_router(auth.router, prefix=api)
 app.include_router(users.router, prefix=api)
 app.include_router(campaigns.router, prefix=api)
+app.include_router(location_gate_videos.router, prefix=api)
+app.include_router(locations.router, prefix=api)
 app.include_router(tokens.router, prefix=api)
 app.include_router(ads.router, prefix=api)
 app.include_router(otp.router, prefix=api)

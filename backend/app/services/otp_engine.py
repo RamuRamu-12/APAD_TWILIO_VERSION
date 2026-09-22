@@ -10,7 +10,8 @@ from app.models.otp_log import OtpLog
 from app.models.user import User
 from app.services.ad_completion_tracker import has_valid_completion
 from app.services.ad_gates import GATE_OTP_REQUEST
-from app.services.ad_context import resolve_context_for_gate
+from app.services.audience_matching import select_campaign_for_user
+from app.services.watch_context import resolve_watch_context
 from app.services.sms_provider import get_sms_provider
 from app.utils.phone import mask_mobile, normalize_mobile
 from app.utils.security import generate_otp
@@ -20,9 +21,10 @@ _EXTERNAL_OTP_PLACEHOLDER = "twilio"
 
 async def send_otp(db: Session, mobile: str, token: str | None) -> dict:
     settings = get_settings()
-    user, campaign, token_val = resolve_context_for_gate(
-        db, token, mobile, GATE_OTP_REQUEST
-    )
+    ctx = resolve_watch_context(db, token, mobile, GATE_OTP_REQUEST)
+    user = ctx.user
+    token_val = ctx.token_val
+    campaign = ctx.campaign or select_campaign_for_user(db, user)
 
     if not has_valid_completion(db, user.id, token_val, GATE_OTP_REQUEST):
         raise HTTPException(
@@ -58,7 +60,8 @@ async def send_otp(db: Session, mobile: str, token: str | None) -> dict:
         return _build_send_response(user.mobile, settings, None, None)
 
     code = generate_otp(settings.otp_length)
-    promo = _personalize_promo(campaign.promo_suffix, user.name, token_val)
+    promo_suffix = campaign.promo_suffix if campaign else ""
+    promo = _personalize_promo(promo_suffix, user.name, token_val)
 
     db.add(
         OtpLog(

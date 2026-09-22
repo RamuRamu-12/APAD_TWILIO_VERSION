@@ -9,6 +9,7 @@ from app.models.generated_token import GeneratedToken
 from app.models.otp_log import OtpLog
 from app.models.user import User
 from app.schemas.user import UserRegister, UserUpdate
+from app.services.location_service import assert_active_location_for_user_area
 from app.utils.security import hash_password, verify_password
 
 
@@ -20,13 +21,14 @@ def register_user(db: Session, data: UserRegister) -> User:
         raise HTTPException(status_code=400, detail="Email already registered")
 
     opted_in = bool(data.marketing_opt_in)
+    area = assert_active_location_for_user_area(db, data.area)
     user = User(
         name=data.name,
         mobile=data.mobile,
         email=email,
         age=data.age,
         gender=data.gender,
-        area=data.area,
+        area=area,
         role="user",
         marketing_opt_in=opted_in,
         marketing_consent_updated_at=datetime.now(timezone.utc) if opted_in else None,
@@ -65,12 +67,13 @@ def update_user(db: Session, user_id: int, data: UserUpdate) -> User:
     opted_in = bool(data.marketing_opt_in)
     consent_changed = user.marketing_opt_in != opted_in
 
+    area = assert_active_location_for_user_area(db, data.area)
     user.name = data.name
     user.mobile = data.mobile
     user.email = email
     user.age = data.age
     user.gender = data.gender
-    user.area = data.area
+    user.area = area
     user.marketing_opt_in = opted_in
     if consent_changed:
         user.marketing_consent_updated_at = datetime.now(timezone.utc)

@@ -19,6 +19,7 @@ import Recommendations from "../pages/portal/Recommendations";
 import Profile from "../pages/portal/Profile";
 import AdminLogin from "../pages/admin/AdminLogin";
 import AdminControlCenter from "../pages/admin/AdminControlCenter";
+import AdminGateVideos from "../pages/admin/AdminGateVideos";
 import AdminUsers from "../pages/admin/AdminUsers";
 import AdminSendCampaign from "../pages/admin/AdminSendCampaign";
 
@@ -79,7 +80,8 @@ export default function AppRoutes() {
           </ProtectedRoute>
         }
       >
-        <Route path="/admin" element={<AdminControlCenter />} />
+        <Route path="/admin" element={<Navigate to="/admin/gate-videos" replace />} />
+        <Route path="/admin/gate-videos" element={<AdminGateVideos />} />
         <Route path="/admin/campaigns" element={<AdminControlCenter />} />
         <Route path="/admin/users" element={<AdminUsers />} />
         <Route path="/admin/send-campaign" element={<AdminSendCampaign />} />

@@ -12,6 +12,9 @@ class AdCompletion(Base):
     id: Mapped[int] = mapped_column(Integer, primary_key=True)
     user_id: Mapped[int] = mapped_column(ForeignKey("users.id"))
     campaign_id: Mapped[int] = mapped_column(ForeignKey("campaigns.id"))
+    location_gate_video_id: Mapped[int | None] = mapped_column(
+        ForeignKey("location_gate_videos.id"), nullable=True
+    )
     token: Mapped[str | None] = mapped_column(String(64), nullable=True)
     gate: Mapped[str] = mapped_column(String(32), default="login", index=True)
     watch_duration: Mapped[int] = mapped_column(Integer, default=0)

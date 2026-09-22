@@ -2,7 +2,7 @@ import { FormEvent, useCallback, useEffect, useState } from "react";
 import PhoneInput from "../../components/ui/PhoneInput";
 import { useToast } from "../../context/ToastContext";
 import { api } from "../../lib/api";
-import type { User } from "../../types/api";
+import type { Location, User } from "../../types/api";
 
 const emptyForm = {
   name: "",
@@ -21,6 +21,7 @@ export default function AdminUsers() {
   const [editingId, setEditingId] = useState<number | null>(null);
   const [loading, setLoading] = useState(false);
   const [deletingId, setDeletingId] = useState<number | null>(null);
+  const [locations, setLocations] = useState<Location[]>([]);
 
   const loadAll = useCallback(() => {
     return api.get<User[]>("/api/users").then((r) => setUsers(r.data));
@@ -28,7 +29,11 @@ export default function AdminUsers() {
 
   useEffect(() => {
     loadAll();
-  }, [loadAll]);
+    api
+      .get<Location[]>("/api/admin/locations")
+      .then((r) => setLocations(r.data.filter((l) => l.is_active)))
+      .catch(() => showToast("Could not load locations", true));
+  }, [loadAll, showToast]);
 
   const set = <K extends keyof typeof form>(key: K, value: (typeof form)[K]) => {
     setForm((f) => ({ ...f, [key]: value }));
@@ -169,8 +174,20 @@ export default function AdminUsers() {
             </select>
           </div>
           <div className="form-group">
-            <label className="form-label">City</label>
-            <input className="form-input" value={form.area} onChange={(e) => set("area", e.target.value)} />
+            <label className="form-label">Location</label>
+            <select
+              className="form-input form-select"
+              value={form.area}
+              onChange={(e) => set("area", e.target.value)}
+              required
+            >
+              <option value="">Select location</option>
+              {locations.map((loc) => (
+                <option key={loc.id} value={loc.name}>
+                  {loc.name}
+                </option>
+              ))}
+            </select>
           </div>
           <label
             className="form-group"

@@ -78,7 +78,8 @@ App: http://localhost:5173
 | `OTP_SIMULATION_MODE` | POC OTP mode | `true` |
 | `OTP_SHOW_ON_SCREEN` | Return OTP in API for UI (mock only) | `true` |
 | `SEED_DEMO_DATA` | Create admin + demo user + campaign | `true` |
-| `ADMIN_MOBILE` | Seeded admin phone | `9999999999` |
+| `DEFAULT_PHONE_REGION` | Parse bare mobiles (ISO region) | `US` |
+| `ADMIN_MOBILE` | Seeded admin phone (E.164) | `+14155552672` |
 
 See [backend/.env.example](backend/.env.example) for all keys.
 
@@ -99,7 +100,7 @@ See [frontend/.env.example](frontend/.env.example).
 ### Flow 2 — Login (fastest test)
 
 1. Open http://localhost:5173  
-2. **Register** or use demo mobile `9876543210` (seeded)  
+2. **Register** or use demo mobile `+14155552671` (seeded)  
 3. **Login** → enter mobile → **Watch ad** (≥5 seconds / let video end)  
 4. **OTP confirmation** — copy OTP from yellow POC box  
 5. **Enter OTP** → **Dashboard**
@@ -114,7 +115,7 @@ See [frontend/.env.example](frontend/.env.example).
 ### Admin panel
 
 - **URL:** http://localhost:5173/admin/login  
-- **Mobile:** `9999999999` (from `ADMIN_MOBILE` in backend `.env`)  
+- **Mobile:** `+14155552672` (from `ADMIN_MOBILE` in backend `.env`)  
 - **Password:** `admin123` (from `ADMIN_PASSWORD`) — no ad or OTP required  
 - **Console paths:** `/admin`, `/admin/campaigns`, `/admin/users`, `/admin/analytics`  
 - Create end users under **Users**; create campaigns and ad creatives under **Campaigns**

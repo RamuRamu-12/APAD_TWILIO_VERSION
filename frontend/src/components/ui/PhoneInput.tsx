@@ -2,6 +2,10 @@ import type { Country } from "react-phone-number-input";
 import PhoneInputWithCountry from "react-phone-number-input";
 import "react-phone-number-input/style.css";
 
+import { config } from "../../lib/config";
+
+const DEFAULT_PHONE_COUNTRY = config.defaultPhoneCountry as Country;
+
 type Props = {
   value: string;
   onChange: (value: string) => void;
@@ -13,7 +17,7 @@ type Props = {
 export default function PhoneInput({
   value,
   onChange,
-  defaultCountry = "IN",
+  defaultCountry = DEFAULT_PHONE_COUNTRY,
   required,
   placeholder = "Mobile number",
 }: Props) {
