@@ -8,7 +8,7 @@ interface Props {
 }
 
 export default function ProtectedRoute({ children, adminOnly }: Props) {
-  const { user, isAdmin } = useAuth();
+  const { isAdmin } = useAuth();
   const token = getToken();
 
   if (!token) {
