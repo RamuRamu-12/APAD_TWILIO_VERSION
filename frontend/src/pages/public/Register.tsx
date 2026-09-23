@@ -1,5 +1,6 @@
-import { FormEvent, useEffect, useState } from "react";
+import { FormEvent, useEffect, useMemo, useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
+import LocationAutocomplete from "../../components/ui/LocationAutocomplete";
 import PhoneInput from "../../components/ui/PhoneInput";
 import {
   IconArrowRight,
@@ -45,6 +46,11 @@ export default function Register() {
     return !isNaN(n) && n >= 1 && n <= 120;
   };
   const step1Valid = isNameValid && isEmailValid && isMobileValid && isAgeValid();
+
+  const locationNames = useMemo(
+    () => locations.map((l) => l.name),
+    [locations]
+  );
 
   useEffect(() => {
     apiPublic
@@ -306,26 +312,24 @@ export default function Register() {
                 Location
               </label>
               <div className="input-with-icon">
-                <select
+                <LocationAutocomplete
                   id="location"
-                  className="form-input form-select"
                   value={form.area}
-                  onChange={(e) => setForm({ ...form, area: e.target.value })}
+                  onChange={(area) => setForm({ ...form, area })}
+                  suggestions={locationNames}
+                  inputClassName="form-input"
+                  placeholder={
+                    locationsLoading
+                      ? "Loading locations…"
+                      : locations.length === 0
+                        ? "No locations available"
+                        : 'Search your city (e.g. "c" for Chennai…)'
+                  }
                   disabled={locationsLoading || locations.length === 0}
+                  allowCustom={false}
                   required
-                >
-                  {locations.length === 0 ? (
-                    <option value="">
-                      {locationsLoading ? "Loading locations…" : "No locations available"}
-                    </option>
-                  ) : (
-                    locations.map((loc) => (
-                      <option key={loc.id} value={loc.name}>
-                        {loc.name}
-                      </option>
-                    ))
-                  )}
-                </select>
+                  emptyHint="No matching location. Pick from suggestions."
+                />
                 <span className="input-icon-left">
                   <IconLocation />
                 </span>

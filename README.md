@@ -79,7 +79,7 @@ App: http://localhost:5173
 | `OTP_SHOW_ON_SCREEN` | Return OTP in API for UI (mock only) | `true` |
 | `SEED_DEMO_DATA` | Create admin + demo user + campaign | `true` |
 | `DEFAULT_PHONE_REGION` | Parse bare mobiles (ISO region) | `US` |
-| `ADMIN_MOBILE` | Seeded admin phone (E.164) | `+14155552672` |
+| `ADMIN_MOBILE` | Seeded admin phone (E.164) | `+11111111111` |
 
 See [backend/.env.example](backend/.env.example) for all keys.
 
@@ -115,7 +115,7 @@ See [frontend/.env.example](frontend/.env.example).
 ### Admin panel
 
 - **URL:** http://localhost:5173/admin/login  
-- **Mobile:** `+14155552672` (from `ADMIN_MOBILE` in backend `.env`)  
+- **Mobile:** `1111111111` / `+11111111111` (from `ADMIN_MOBILE` in backend `.env`)  
 - **Password:** `admin123` (from `ADMIN_PASSWORD`) — no ad or OTP required  
 - **Console paths:** `/admin`, `/admin/campaigns`, `/admin/users`, `/admin/analytics`  
 - Create end users under **Users**; create campaigns and ad creatives under **Campaigns**

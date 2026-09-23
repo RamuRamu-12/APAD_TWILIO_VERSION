@@ -1,6 +1,8 @@
 import { FormEvent, useCallback, useEffect, useMemo, useState } from "react";
 import { useToast } from "../../context/ToastContext";
 import { api } from "../../lib/api";
+import LocationAutocomplete from "../../components/ui/LocationAutocomplete";
+import { LOCATION_SUGGESTIONS } from "../../lib/locationSuggestions";
 import { extractYoutubeVideoId } from "../../lib/youtube";
 import type { GateVideo, GateVideoCatalog, Location } from "../../types/api";
 
@@ -256,11 +258,12 @@ export default function AdminGateVideos() {
           {targetKey === NEW_LOCATION && (
             <label style={{ gridColumn: "1 / -1" }}>
               New location name
-              <input
-                className="input-field"
-                placeholder="e.g. Austin"
+              <LocationAutocomplete
                 value={newLocationName}
-                onChange={(e) => setNewLocationName(e.target.value)}
+                onChange={setNewLocationName}
+                suggestions={LOCATION_SUGGESTIONS}
+                placeholder='Type "c" for Chennai, China, California…'
+                allowCustom
                 required
               />
             </label>

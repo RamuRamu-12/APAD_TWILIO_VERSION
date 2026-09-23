@@ -1,6 +1,5 @@
 import { FormEvent, useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
-import PhoneInput from "../../components/ui/PhoneInput";
 import { useAuth } from "../../context/AuthContext";
 import { useToast } from "../../context/ToastContext";
 import { apiPublic } from "../../lib/api";
@@ -11,7 +10,7 @@ export default function AdminLogin() {
   const navigate = useNavigate();
   const { login } = useAuth();
   const { showToast } = useToast();
-  const [mobile, setMobile] = useState("");
+  const [mobile, setMobile] = useState("1111111111");
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
@@ -54,7 +53,19 @@ export default function AdminLogin() {
       <form onSubmit={submit}>
         <div className="form-group">
           <label className="form-label">Mobile</label>
-          <PhoneInput value={mobile} onChange={setMobile} required />
+          <input
+            type="tel"
+            className="form-input"
+            value={mobile}
+            onChange={(e) => setMobile(e.target.value.replace(/\D/g, "").slice(0, 11))}
+            placeholder="1111111111"
+            inputMode="numeric"
+            autoComplete="tel"
+            required
+          />
+          <p className="text-muted" style={{ fontSize: "0.8rem", marginTop: "0.35rem" }}>
+            Demo admin mobile: 1111111111
+          </p>
         </div>
         <div className="form-group">
           <label className="form-label">Password</label>

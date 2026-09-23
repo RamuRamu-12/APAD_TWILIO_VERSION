@@ -201,4 +201,46 @@
     color: var(--accent-cyan);
     border: 1px solid rgba(0, 242, 254, 0.3);
   }
+
+  .location-autocomplete-list {
+    position: absolute;
+    z-index: 50;
+    left: 0;
+    right: 0;
+    top: calc(100% + 4px);
+    margin: 0;
+    padding: 0.35rem 0;
+    list-style: none;
+    max-height: 240px;
+    overflow-y: auto;
+    background: rgba(20, 20, 34, 0.98);
+    border: 1px solid var(--glass-border);
+    border-radius: 12px;
+    box-shadow: var(--glass-shadow);
+  }
+
+  .location-autocomplete-empty {
+    padding: 0.75rem 1rem;
+    font-size: 0.85rem;
+    color: var(--text-muted);
+  }
+
+  .location-autocomplete-option {
+    display: block;
+    width: 100%;
+    text-align: left;
+    padding: 0.55rem 1rem;
+    border: none;
+    background: transparent;
+    color: var(--text-primary);
+    font-family: inherit;
+    font-size: 0.95rem;
+    cursor: pointer;
+  }
+
+  .location-autocomplete-option:hover,
+  .location-autocomplete-option.highlighted {
+    background: rgba(0, 242, 254, 0.12);
+    color: var(--accent-cyan);
+  }
 }

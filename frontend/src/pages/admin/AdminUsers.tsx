@@ -1,4 +1,5 @@
-import { FormEvent, useCallback, useEffect, useState } from "react";
+import { FormEvent, useCallback, useEffect, useMemo, useState } from "react";
+import LocationAutocomplete from "../../components/ui/LocationAutocomplete";
 import PhoneInput from "../../components/ui/PhoneInput";
 import { useToast } from "../../context/ToastContext";
 import { api } from "../../lib/api";
@@ -26,6 +27,11 @@ export default function AdminUsers() {
   const loadAll = useCallback(() => {
     return api.get<User[]>("/api/users").then((r) => setUsers(r.data));
   }, []);
+
+  const locationNames = useMemo(
+    () => locations.map((l) => l.name),
+    [locations]
+  );
 
   useEffect(() => {
     loadAll();
@@ -175,19 +181,16 @@ export default function AdminUsers() {
           </div>
           <div className="form-group">
             <label className="form-label">Location</label>
-            <select
-              className="form-input form-select"
+            <LocationAutocomplete
               value={form.area}
-              onChange={(e) => set("area", e.target.value)}
+              onChange={(area) => set("area", area)}
+              suggestions={locationNames}
+              inputClassName="form-input"
+              placeholder='Search location (e.g. "m" for Mumbai…)'
+              allowCustom={false}
               required
-            >
-              <option value="">Select location</option>
-              {locations.map((loc) => (
-                <option key={loc.id} value={loc.name}>
-                  {loc.name}
-                </option>
-              ))}
-            </select>
+              emptyHint="No matching location in admin list."
+            />
           </div>
           <label
             className="form-group"

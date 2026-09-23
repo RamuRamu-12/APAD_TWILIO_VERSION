@@ -39,7 +39,7 @@ class Settings(BaseSettings):
     min_watch_seconds: int = 5
 
     seed_demo_data: bool = True
-    admin_mobile: str = "+14155552672"
+    admin_mobile: str = "+11111111111"
     admin_password: str = "admin123"
 
     msg91_auth_key: str = ""

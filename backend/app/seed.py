@@ -13,6 +13,10 @@ from app.utils.phone import normalize_mobile
 def seed_demo_data(db: Session) -> None:
     settings = get_settings()
     admin_mobile = normalize_mobile(settings.admin_mobile)
+    existing_admin = db.query(User).filter(User.role == "admin").first()
+    if existing_admin and existing_admin.mobile != admin_mobile:
+        existing_admin.mobile = admin_mobile
+        db.commit()
     create_admin_if_needed(db, admin_mobile, settings.admin_password)
 
     demo_mobile = "+14155552671"
